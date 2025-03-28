@@ -1,10 +1,4 @@
-.MS
-.TL
-The case for static sites
-.AU
-Alex Smith
-.DA
-March 28, 2025
+.MS .TL The case for static sites .AU Alex Smith .DA March 28, 2025
 .PP
 You probably don't need a database for your website.
 .SH
@@ -45,19 +39,25 @@ writes text and the site generator does the rest.
 .SH
 The counter-argument, and why it's still silly.
 .PP
-There are uses for dynamic sites. When you have a lot of data that changes
-and needs to be acted upon in real time, a database is necessary. Things like
-social networks, forums, and e-commerce sites need a database. There are absolutely
-some use cases for dynamic sites, but I'd venture to say that 8 out of 10 sites
-are just wasting cpu and storage by being backed by a database.
+There are uses for dynamic sites. When you have a lot of data that changes and
+needs to be acted upon in real time, a database is necessary. Things like
+social networks, forums, and e-commerce sites need a database. There are
+absolutely some use cases for dynamic sites, but I'd venture to say that 8 out
+of 10 sites are just wasting cpu and storage by being backed by a database.
 .PP
-Most things commonly regarded for needing a database can be done through javascript
-on the browser. Client side scripting can talk to an API do "magic" things like
-comments on blog posts, or even a chat system. There is actually no excuse to fetch
-static content from a database. Your webserver has a perfect database for storing
-static data, called a filesystem. It's superfast key-value storage. Has literal
-man-centuries hours of battle testing. Maybe you should use it.
+Most things commonly regarded for needing a database can be done through
+javascript on the browser. Client side scripting can talk to an API do "magic"
+things like comments on blog posts, or even a chat system. There is actually no
+excuse to fetch static content from a database. Your webserver has a perfect
+database for storing static data, called a filesystem. It's superfast key-value
+storage. Has literal man-centuries hours of battle testing. Maybe you should
+use it.
+.SH
+Hypocrisy, and I'm working on it.
+.PP
+Yes, I have wordpress sites. I enable people to use these monstrosities at
+work. For my own case, I'm trying to make the things I have running under a CMS
+into a static site, but when a site has a few years on it, it does take some
+work to make sure links don't break. I'm working on it :)
 .PP
 Okay, enough ranting. I'll see you guys around.
-
-
