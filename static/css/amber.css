@@ -1,0 +1,102 @@
+html.amber-theme,
+body.amber-theme {
+    background: #1a1a1a;
+    min-height: 100vh;
+}
+
+body.amber-theme {
+    color: #ffbf00;
+    position: relative;
+}
+
+/*
+body.amber-theme::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.3),
+        rgba(0, 0, 0, 0.3) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+*/
+
+.amber-theme .sidebar {
+    background: #1a1a1a;
+}
+
+.amber-theme .sidebar .profile-pic {
+    border-color: #ffbf00;
+    filter: sepia(1) hue-rotate(30deg) saturate(5);
+}
+
+.amber-theme .sidebar .profile-pic {
+    border-color: #ffbf00;
+    filter: grayscale(0.5) sepia(1) hue-rotate(0deg) saturate(2) brightness(1.1);
+    box-shadow: 0 0 1px #ffbf00, 0 0 1px #ffbf00;
+}
+
+.amber-theme .sidebar a,
+.amber-theme a {
+    color: #ffd700;
+    text-shadow: 0 0 1px #ffbf00, 0 0 1px #ffbf00;
+}
+
+.amber-theme h1 h2 h3 h4 h5 h6 {
+    border-bottom: none; /* Handled by .post-header */
+    text-shadow: 0 0 1px #ffbf00, 0 0 1px #ffbf00;
+    position: relative;
+}
+
+.amber-theme .post-meta {
+    opacity: 0.7;
+    text-shadow: 0 0 1px #ffbf00;
+}
+
+.amber-theme p,
+.amber-theme li {
+    text-shadow: 0 0 1px #ffbf00, 0 0 1px #ffbf00;
+    position: relative;
+}
+
+.amber-theme .fa {
+    text-shadow: 0 0 1px #ffbf00, 0 0 1px #ffbf00;
+}
+
+.amber-theme.scrolling p:after,
+.amber-theme.scrolling h1:after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ffbf00;
+    opacity: 0.3;
+    text-shadow: 0 0 2px #ffbf00;
+    transform: translateY(1px);
+    animation: phosphor-fade 0.2s ease-out forwards;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes phosphor-fade {
+    0% { opacity: 0.3; }
+    100% { opacity: 0; }
+}
+
+.amber-theme .post-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #ffbf00;
+}
+
+.amber-theme .navigation {
+    background: #1a1a1a;
+    border-top: 1px solid #ffbf00;
+}

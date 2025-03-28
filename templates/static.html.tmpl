@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="{{TITLE}} - A page on {{BLOG_NAME}}.">
+    <meta name="keywords" content="blog, groff, OpenBSD, minimalist, {{TITLE}}">
+    <link rel="stylesheet" href="font-awesome.min.css?{{TIMESTAMP}}">
+    <title>{{BLOG_NAME}} - {{TITLE}}</title>
+    <link rel="stylesheet" href="vars.css?{{TIMESTAMP}}">
+    <link rel="stylesheet" href="boring-web-snob.css?{{TIMESTAMP}}">
+    <link rel="stylesheet" href="amber.css?{{TIMESTAMP}}">
+    <link rel="stylesheet" href="green.css?{{TIMESTAMP}}">
+    <link rel="stylesheet" href="prism.css?{{TIMESTAMP}}">
+</head>
+<body class="{{PAGE_TYPE}}">
+    <div class="sidebar">
+        <img src="profile.jpg" alt="Profile Picture" class="profile-pic">
+        <h3>Links</h3>
+        <div class="sidebar-links">
+            {{SIDEBAR_HTML}}
+        </div>
+    </div>
+    <div class="main">
+        <div class="post">
+            <div class="post-header">
+                <h1 data-text="{{TITLE}}">{{TITLE}}</h1>
+                <hr>
+            </div>
+            <div class="post-content">
+                {{CONTENT_PLACEHOLDER}}
+            </div>
+        </div>
+        <div class="navigation">
+            <div class="prev">{{PREV_LINK}}</div>
+            <div class="index"><a href="index.html">Back to Index</a></div>
+            <div class="next">{{NEXT_LINK}}</div>
+            <div class="source-link">{{SOURCE_LINK}}</div>
+        </div>
+    </div>
+    <script src="prism.js"></script>
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'amber';
+        body.classList.add(savedTheme + '-theme');
+        toggle.value = savedTheme;
+        toggle.addEventListener('change', (e) => {
+            body.className = '';
+            if (e.target.value !== 'default') body.classList.add(e.target.value + '-theme');
+            localStorage.setItem('theme', e.target.value);
+        });
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            body.classList.add('scrolling');
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => body.classList.remove('scrolling'), 200);
+        });
+    </script>
+</body>
+</html>
