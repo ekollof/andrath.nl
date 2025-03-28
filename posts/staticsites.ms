@@ -1,5 +1,7 @@
+:so macros.ms
 .MS 
-.TL The case for static sites 
+.TL 
+The case for static sites 
 .AU
 Emiel Kollof (Andrath)
 .DA
