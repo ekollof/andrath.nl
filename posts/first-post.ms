@@ -25,7 +25,7 @@ Themes through CSS
 Static pages (no database, no problems)
 .LI
 Open Source: 
-.URL https://github.com/ekollof/andrath GitHub
+.URL https://github.com/ekollof/andrath.nl GitHub
 .ULE
 .PP
 If you look at the bottom right, you can actually see the groff source of this page.
