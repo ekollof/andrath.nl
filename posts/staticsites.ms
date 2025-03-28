@@ -1,4 +1,9 @@
-.MS .TL The case for static sites .AU Alex Smith .DA March 28, 2025
+.MS 
+.TL The case for static sites 
+.AU
+Emiel Kollof (Andrath)
+.DA
+March 28, 2025
 .PP
 You probably don't need a database for your website.
 .SH
