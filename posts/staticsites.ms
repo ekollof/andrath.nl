@@ -18,7 +18,8 @@ overkill for a site that's mostly static. They require a database, which adds
 complexity and overhead. They're also a security risk. If the CMS isn't kept up
 to date, it can be hacked. And they're slow. Every time a page is requested,
 the CMS has to generate it from the database. This takes time, especially if
-the database is large.
+the database is large. Of course you can implement caching, but isn't that just
+a band-aid?
 .PP
 Even a blog can be done statically, as evidenced by this site. This blog is
 built using templates and it generates webpages using a static site generator.
