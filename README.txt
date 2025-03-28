@@ -32,7 +32,7 @@ Setup Instructions
    Ensure your directory looks like this:
    .
    ├── blog.conf           # Configuration file (optional)
-   ├── build-blog.ksh      # Build script to generate the site
+   ├── publish.ksh      # Build script to generate the site
    ├── index.ms            # Index page description (groff .ms file)
    ├── pages/              # Static pages (e.g., bio.ms, contact.ms)
    │   ├── bio.ms
@@ -101,7 +101,7 @@ Setup Instructions
 
 8. Build the Site:
    Run the build script to generate the HTML files:
-   ./build-blog.ksh
+   ./publish.ksh
    This will create the public/ directory with all generated HTML, CSS, and assets.
 
 9. Serve the Site:
@@ -121,19 +121,19 @@ Customization
 - Sidebar Links: Edit sidebar.links to add or remove links.
 - Profile Picture: Replace static/images/profile.jpg with your own image.
 - Favicon: Add a favicon.ico to static/.
-- Themes: Modify amber.css and green.css to adjust theme colors, or add new themes by creating additional CSS files and updating the theme toggle in build-blog.ksh.
+- Themes: Modify amber.css and green.css to adjust theme colors, or add new themes by creating additional CSS files and updating the theme toggle in publish.ksh.
 
 File Structure
 --------------
 - blog.conf: Configuration file for blog settings (optional).
-- build-blog.ksh: Script to generate the static site.
+- publish.ksh: Script to generate the static site.
 - index.ms: Groff file for the index page description.
 - pages/: Directory for static pages (e.g., bio.ms, contact.ms).
 - posts/: Directory for blog posts (e.g., post1.ms).
 - sidebar.links: Configuration file for sidebar links (optional).
 - static/: Directory for static assets (CSS, fonts, images).
 - templates/: Directory for HTML templates (index.html.tmpl, post.html.tmpl).
-- public/: Output directory for the generated site (created by build-blog.ksh).
+- public/: Output directory for the generated site (created by publish.ksh).
 
 How It Works
 ------------
@@ -141,7 +141,7 @@ How It Works
    - Blog posts and static pages are written in groff .ms format (e.g., posts/post1.ms, pages/bio.ms).
    - The index page description is written in index.ms.
 2. Build Process:
-   - The build-blog.ksh script:
+   - The publish.ksh script:
      - Processes .ms files with groff to generate HTML.
      - Sorts posts by date (newest first).
      - Generates the sidebar with links from sidebar.links and static pages.
@@ -167,7 +167,7 @@ Adding a New Post
    .PP
    This is a new blog post written in groff.
 2. Run the build script:
-   ./build-blog.ksh
+   ./publish.ksh
 3. The new post will appear on the index page, sorted by date.
 
 Adding a New Static Page
@@ -178,7 +178,7 @@ Adding a New Static Page
    .PP
    I'm Alex, a minimalist coder who loves OpenBSD and groff.
 2. Run the build script:
-   ./build-blog.ksh
+   ./publish.ksh
 3. The new page will be generated (e.g., public/about.html) and added to the sidebar.
 
 Troubleshooting
