@@ -181,7 +181,7 @@ To set up and run this blog, you'll need:
 
 3. **Styling:**
 
-   - `boring-web-snob.css`: Main stylesheet for layout and styling.
+   - `base.css`: Main stylesheet for layout and styling.
    - `vars.css`: Defines color variables (generated from `blog.conf`).
 
 4. **Output:**
