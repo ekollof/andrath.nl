@@ -1,13 +1,12 @@
 # My Groff Blog
 
-A minimalist blog built with groff on OpenBSD, designed for simplicity and lightweight performance. This blog uses groff to generate HTML content from `.ms` files, styled with a clean, retro-inspired CSS theme. It features a fixed sidebar with links, a responsive layout, and a theme toggle for different color schemes (default, amber, green).
+A minimalist blog built with groff on OpenBSD, designed for simplicity and lightweight performance. This blog uses groff to generate HTML content from `.ms` files, styled with a clean, retro-inspired CSS theme. It features a fixed sidebar with links and a responsive layout.
 
 ## Features
 
 - **Lightweight:** Built with groff and minimal CSS/JS, ensuring fast load times.
 - **Static Site:** No server-side processing; all pages are pre-generated HTML.
 - **Responsive Design:** Adapts to mobile and desktop screens.
-- **Theme Toggle:** Switch between default, amber (VT220-inspired), and green (IBM green) themes.
 - **Customizable:** Easily configure the blog name, subtitle, colors, and sidebar links.
 - **SEO-Friendly:** Includes meta tags for better search engine visibility.
 - **Source Code View:** Each post and static page includes a "View Source" link to view the formatted `.ms` source as HTML.
@@ -47,9 +46,7 @@ To set up and run this blog, you'll need:
         ├── sidebar.links       # Sidebar links configuration (optional)
         ├── static/             # Static assets (CSS, fonts, images)
         │   ├── css/
-        │   │   ├── amber.css
-        │   │   ├── boring-web-snob.css
-        │   │   └── green.css
+        │   │   └── base.css
         │   ├── fonts/
         │   │   ├── JetBrainsMono-Regular.woff2
         │   │   └── fontawesome-webfont.woff2
@@ -152,7 +149,6 @@ To set up and run this blog, you'll need:
 - **Sidebar Links:** Edit `sidebar.links` to add or remove links.
 - **Profile Picture:** Replace `static/images/profile.jpg` with your own image.
 - **Favicon:** Add a `favicon.ico` to `static/`.
-- **Themes:** Modify `amber.css` and `green.css` to adjust theme colors, or add new themes by creating additional CSS files and updating the theme toggle in `publish.ksh`.
 
 ## File Structure
 
@@ -187,8 +183,6 @@ To set up and run this blog, you'll need:
 
    - `boring-web-snob.css`: Main stylesheet for layout and styling.
    - `vars.css`: Defines color variables (generated from `blog.conf`).
-   - `amber.css` and `green.css`: Theme stylesheets for color schemes.
-   - A JavaScript theme toggle allows users to switch between themes (default, amber, green).
 
 4. **Output:**
 
