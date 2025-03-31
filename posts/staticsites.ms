@@ -1,11 +1,11 @@
-:so macros.ms
+.so macros.ms
 .MS 
 .TL 
 The case for static sites 
 .AU
 Emiel Kollof (Andrath)
 .DA
-March 28, 2025
+March 28, 2025 08:23:32
 .PP
 You probably don't need a database for your website.
 .SH

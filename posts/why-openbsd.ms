@@ -5,7 +5,7 @@ Why OpenBSD?
 .AU
 Emiel Kollof (Andrath)
 .DA
-March 28, 2025
+March 28, 2025 00:52:32
 .PP
 Why on earth am I actually using OpenBSD as a daily driver for serious?
 .SH

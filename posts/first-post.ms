@@ -5,7 +5,7 @@ First post on this blog
 .AU
 Emiel Kollof
 .DA
-March 27, 2025
+March 27, 2025 15:00:00
 .PP
 Every blog has a first post. This one is mine. We gotta start somewhere, right?
 .SH

@@ -185,7 +185,14 @@ while [ "$i" -lt "$total_posts" ]; do
     post=${posts[$i]}
     title=$(sed -n '/^\.TL/{n;p;}' "$post")
     author=$(sed -n '/^\.AU/{n;p;}' "$post")
-    date=$(sed -n '/^\.DA/{n;p;}' "$post")
+    date_line=$(sed -n '/^\.DA/{n;p;}' "$post")
+    date=$(echo "$date_line" | awk '{$NF=""; print $0}' | sed 's/ $//')
+    time=$(echo "$date_line" | awk '{print $NF}')
+    # Check if time follows the expected format (HH:MM:SS), if not it's part of the date
+    if ! echo "$time" | grep -qE '^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$'; then
+        date="$date_line"
+        time="00:00:00"
+    fi
     htmlfile="public/$(basename "$post" .ms).html"
     sourcehtml="public/$(basename "$post" .ms)_source.html"
     sourcefile="public/$(basename "$post" .ms).ms"
@@ -196,7 +203,7 @@ while [ "$i" -lt "$total_posts" ]; do
 
     # Convert date to a sortable format (YYYY-MM-DD) for sorting
     if [ "$date" = "No Date" ]; then
-        sortable_date="0000-00-00"
+        sortable_date="0000-00-00 00:00:00"
     else
         # Parse the date (e.g., "March 26, 2025") into YYYY-MM-DD
         # This is a simple approximation; assumes format "Month Day, Year"
@@ -219,7 +226,7 @@ while [ "$i" -lt "$total_posts" ]; do
             *) month_num="00" ;;
         esac
         [ "${#day}" -eq 1 ] && day="0$day"
-        sortable_date="$year-$month_num-$day"
+        sortable_date="$year-$month_num-$day $time"
     fi
 
     # Copy the source file
