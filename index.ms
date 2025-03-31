@@ -5,7 +5,7 @@ This blog is a hand coded monstrosity that turns Groff pages into blog posts.
 It's a work in progress, but I'm happy with it so far.
 .PP
 Source code for this blog can be found on my GitLab page:
-.URL https://github.com/ekollof/andrath.nl "Github - roffblog"
+.URL https://github.com/ekollof/andrath.nl "Github - andrath.nl"
 .PP
 This blog is about things that interest me. This will range from technical
 topics to personal projects and anything in between.
