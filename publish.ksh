@@ -31,37 +31,54 @@ total_posts=${#posts[*]}
 # Collect all static pages
 set -A pages pages/*.ms
 
+# Create asset directories
+mkdir -p public/css public/js public/images public/fonts
+
 # Generate sidebar HTML: static pages first, then sidebar.links, then theme toggle
 sidebar_html=""
-# Add "Home" link at the top
-sidebar_html="        <div class=\"sidebar-link\"><span class=\"fa fa-file-text\"></span> <a href=\"index.html\">Home</a></div>"
+sidebar_html="        <div class=\"sidebar-link\"><span class=\"fa fa-file-text\"></span> <a href=\"/index.html\">Home</a></div>"
 
 # Static pages section (excluding index.ms)
 for page in "${pages[@]}"; do
-    # Skip index.ms since it's now the "Home" link
     if [ "$(basename "$page" .ms)" = "index" ]; then
         continue
     fi
-    # Preprocess the page to handle code snippets
     perl preprocess-code.pl "$page" > temp_preprocessed.ms
     title=$(sed -n '/^\.TL/{n;p;}' temp_preprocessed.ms)
     [ -z "$title" ] && title="Untitled Page"
     htmlfile="public/$(basename "$page" .ms).html"
+    sourcehtml="public/$(basename "$page" .ms)_source.html"
     sourcefile="public/$(basename "$page" .ms).ms"
     groff -ms -mwww -Thtml temp_preprocessed.ms > temp.html
-    # Normalize HTML output using normalize-html.pl
     perl normalize-html.pl temp.html > temp_normalized.html
     mv temp_normalized.html temp.html
     content=$(sed -n '/<body>/,/<\/body>/p' temp.html | sed '1d;$d' | sed '/<h1 align="center">/d' | sed 's|<p\(.*\)>\(.*\)</p>|<p\1 data-text="\2">\2</p>|g')
     printf '%s\n' "$content" > temp_content
-    # Copy the source file
     cp "$page" "$sourcefile"
-    # Fail if CONTENT_PLACEHOLDER is not found in the template
+
+    # Generate source HTML for static page
+    cat "$page" | sed 's/</\</g; s/>/\>/g' > temp_source
+    echo "<pre class=\"source-code\">" > temp_source_content
+    cat temp_source >> temp_source_content
+    echo "</pre>" >> temp_source_content
+    sed \
+        -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
+        -e "s|{{TITLE}}|$title (Source)|g" \
+        -e "s|{{AUTHOR}}||g" \
+        -e "s|{{DATE}}||g" \
+        -e "s|{{PAGE_TYPE}}||g" \
+        -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
+        -e "/{{SIDEBAR_HTML}}/r temp_sidebar_html" -e "/{{SIDEBAR_HTML}}/d" \
+        -e "/CONTENT_PLACEHOLDER/r temp_source_content" -e "/CONTENT_PLACEHOLDER/d" \
+        -e "s|{{PREV_LINK}}||g" \
+        -e "s|{{NEXT_LINK}}||g" \
+        -e "s|{{SOURCE_LINK}}||g" \
+        templates/static.html.tmpl > "$sourcehtml"
+
     if ! grep -q "CONTENT_PLACEHOLDER" templates/static.html.tmpl; then
         echo "Error: CONTENT_PLACEHOLDER placeholder not found in templates/static.html.tmpl" >&2
         exit 1
     fi
-    # Substitute, reading template from templates/
     author=""
     date=""
     sed \
@@ -75,12 +92,12 @@ for page in "${pages[@]}"; do
         -e "/CONTENT_PLACEHOLDER/r temp_content" -e "/CONTENT_PLACEHOLDER/d" \
         -e "s|{{PREV_LINK}}||g" \
         -e "s|{{NEXT_LINK}}||g" \
-        -e "s|{{SOURCE_LINK}}|<a href=\"$(basename "$sourcefile")\">View Source</a>|g" \
+        -e "s|{{SOURCE_LINK}}|<a href=\"/$(basename "$sourcehtml")\">View Source</a>|g" \
         templates/static.html.tmpl > "$htmlfile"
-    sidebar_html="$sidebar_html        <div class=\"sidebar-link\"><span class=\"fa fa-file-text\"></span> <a href=\"$(basename "$htmlfile")\">$title</a></div>"
+    sidebar_html="$sidebar_html        <div class=\"sidebar-link\"><span class=\"fa fa-file-text\"></span> <a href=\"/$(basename "$htmlfile")\">$title</a></div>"
 done
 
-# Sidebar.links section (build into sidebar_html)
+# Sidebar.links section
 if [ -f sidebar.links ]; then
     cat sidebar.links | while IFS='|' read -r type url label icon; do
         echo "        <div class=\"sidebar-link\"><span class=\"fa $icon\"></span> <a href=\"$url\">$label</a></div>" >> temp_sidebar
@@ -94,36 +111,46 @@ else
     sidebar_links="$sidebar_links        <div class=\"sidebar-link\"><span class=\"fa fa-globe\"></span> <a href=\"https://example.com\">My Website</a></div>"
 fi
 sidebar_html="$sidebar_html$sidebar_links"
-# Theme toggle section
-sidebar_html="$sidebar_html        <div class=\"sidebar-link\"><select id=\"theme-toggle\">"
-sidebar_html="$sidebar_html            <option value=\"default\">Default</option>"
-sidebar_html="$sidebar_html            <option value=\"amber\">Amber VT220</option>"
-sidebar_html="$sidebar_html            <option value=\"green\">IBM Green</option>"
-sidebar_html="$sidebar_html        </select></div>"
 
-# Wrap the sidebar_html in a <div class="sidebar-links-list">
 sidebar_html="<div class=\"sidebar-links-list\">$sidebar_html</div>"
-
-# Write sidebar_html to a temporary file
 printf '%s\n' "$sidebar_html" > temp_sidebar_html
 
 # Re-generate static pages with updated sidebar_html
 for page in "${pages[@]}"; do
-    # Skip index.ms since it's now the "Home" link
     if [ "$(basename "$page" .ms)" = "index" ]; then
         continue
     fi
     title=$(sed -n '/^\.TL/{n;p;}' "$page")
     [ -z "$title" ] && title="Untitled Page"
     htmlfile="public/$(basename "$page" .ms).html"
+    sourcehtml="public/$(basename "$page" .ms)_source.html"
     sourcefile="public/$(basename "$page" .ms).ms"
     perl preprocess-code.pl "$page" > temp_preprocessed.ms
     groff -ms -mwww -Thtml temp_preprocessed.ms > temp.html
-    # Normalize HTML output using normalize-html.pl
     perl normalize-html.pl temp.html > temp_normalized.html
     mv temp_normalized.html temp.html
     content=$(sed -n '/<body>/,/<\/body>/p' temp.html | sed '1d;$d' | sed '/<h1 align="center">/d' | sed 's|<p\(.*\)>\(.*\)</p>|<p\1 data-text="\2">\2</p>|g')
     printf '%s\n' "$content" > temp_content
+
+    # Generate source HTML for static page (re-run for consistency)
+    cat "$page" | sed 's/</\</g; s/>/\>/g' > temp_source
+    echo "<pre class=\"source-code\">" > temp_source_content
+    cat temp_source >> temp_source_content
+    echo "</pre>" >> temp_source_content
+    sed \
+        -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
+        -e "s|{{TITLE}}|$title (Source)|g" \
+        -e "s|{{AUTHOR}}||g" \
+        -e "s|{{DATE}}||g" \
+        -e "s|{{PAGE_TYPE}}||g" \
+        -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
+        -e "/{{SIDEBAR_HTML}}/r temp_sidebar_html" -e "/{{SIDEBAR_HTML}}/d" \
+        -e "/CONTENT_PLACEHOLDER/r temp_source_content" -e "/CONTENT_PLACEHOLDER/d" \
+        -e "s|{{PREV_LINK}}||g" \
+        -e "s|{{NEXT_LINK}}||g" \
+        -e "s|{{SOURCE_LINK}}||g" \
+        templates/static.html.tmpl > "$sourcehtml"
+
     author=""
     date=""
     sed \
@@ -137,10 +164,10 @@ for page in "${pages[@]}"; do
         -e "/CONTENT_PLACEHOLDER/r temp_content" -e "/CONTENT_PLACEHOLDER/d" \
         -e "s|{{PREV_LINK}}||g" \
         -e "s|{{NEXT_LINK}}||g" \
-        -e "s|{{SOURCE_LINK}}|<a href=\"$(basename "$sourcefile")\">View Source</a>|g" \
+        -e "s|{{SOURCE_LINK}}|<a href=\"/$(basename "$sourcehtml")\">View Source</a>|g" \
         templates/static.html.tmpl > "$htmlfile"
 done
-#
+
 # Generate vars.css from config
 {
     print ":root {"
@@ -151,22 +178,24 @@ done
     print "    --dark-fg: $DARK_FG;"
     print "    --dark-link: $DARK_LINK;"
     print "}"
-} > public/vars.css
+} > public/css/vars.css
 
-# Copy static files to public (but not templates)
-for file in $(find static/ -type f -print | xargs); do
-    if [ -f "$file" ]; then
-        cp "$file" public/ || echo "Failed to copy $file" >&2
-    else
-        echo "Missing file: $file" >&2
-    fi
+# Copy static files to categorized directories
+for file in $(find static/ -type f -print); do
+    ext=$(echo "$file" | sed 's/.*\.//')
+    case "$ext" in
+        css) cp "$file" public/css/ ;;
+        js) cp "$file" public/js/ ;;
+        jpg|png|gif|svg) cp "$file" public/images/ ;;
+        ttf|woff|woff2) cp "$file" public/fonts/ ;;
+        *) cp "$file" public/ ;;  # Fallback for uncategorized files
+    esac
 done
 
-# Process index.ms with groff to generate the site description
+# Process index.ms
 if [ -f index.ms ]; then
     perl preprocess-code.pl index.ms > temp_preprocessed.ms
     groff -ms -mwww -Thtml temp_preprocessed.ms > temp.html
-    # Normalize HTML output using normalize-html.pl
     perl normalize-html.pl temp.html > temp_normalized.html
     mv temp_normalized.html temp.html
     site_description_groff=$(sed -n '/<body>/,/<\/body>/p' temp.html | sed '1d;$d' | sed '/<h1 align="center">/d' | sed 's|<p\(.*\)>\(.*\)</p>|<p\1 data-text="\2">\2</p>|g')
@@ -179,7 +208,7 @@ fi
 # Clear posts.list before generating
 : > posts.list
 
-# Generate posts and collect entries for sorting
+# Generate posts with date-based structure
 i=0
 while [ "$i" -lt "$total_posts" ]; do
     post=${posts[$i]}
@@ -188,51 +217,44 @@ while [ "$i" -lt "$total_posts" ]; do
     date_line=$(sed -n '/^\.DA/{n;p;}' "$post")
     date=$(echo "$date_line" | awk '{$NF=""; print $0}' | sed 's/ $//')
     time=$(echo "$date_line" | awk '{print $NF}')
-    # Check if time follows the expected format (HH:MM:SS), if not it's part of the date
     if ! echo "$time" | grep -qE '^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$'; then
         date="$date_line"
         time="00:00:00"
     fi
-    htmlfile="public/$(basename "$post" .ms).html"
-    sourcehtml="public/$(basename "$post" .ms)_source.html"
-    sourcefile="public/$(basename "$post" .ms).ms"
-
     [ -z "$title" ] && title="Untitled"
     [ -z "$author" ] && author="Anonymous"
     [ -z "$date" ] && date="No Date"
 
-    # Convert date to a sortable format (YYYY-MM-DD) for sorting
+    # Parse date for directory structure and sortable date
     if [ "$date" = "No Date" ]; then
+        year="0000"
+        month="00"
+        day="00"
         sortable_date="0000-00-00 00:00:00"
     else
-        # Parse the date (e.g., "March 26, 2025") into YYYY-MM-DD
-        # This is a simple approximation; assumes format "Month Day, Year"
-        month=$(echo "$date" | awk '{print $1}')
+        month_name=$(echo "$date" | awk '{print $1}')
         day=$(echo "$date" | awk '{print $2}' | tr -d ',')
         year=$(echo "$date" | awk '{print $3}')
-        case "$month" in
-            January) month_num="01" ;;
-            February) month_num="02" ;;
-            March) month_num="03" ;;
-            April) month_num="04" ;;
-            May) month_num="05" ;;
-            June) month_num="06" ;;
-            July) month_num="07" ;;
-            August) month_num="08" ;;
-            September) month_num="09" ;;
-            October) month_num="10" ;;
-            November) month_num="11" ;;
-            December) month_num="12" ;;
-            *) month_num="00" ;;
+        case "$month_name" in
+            January) month="01" ;; February) month="02" ;; March) month="03" ;;
+            April) month="04" ;; May) month="05" ;; June) month="06" ;;
+            July) month="07" ;; August) month="08" ;; September) month="09" ;;
+            October) month="10" ;; November) month="11" ;; December) month="12" ;;
+            *) month="00" ;;
         esac
         [ "${#day}" -eq 1 ] && day="0$day"
-        sortable_date="$year-$month_num-$day $time"
+        sortable_date="$year-$month-$day $time"
     fi
 
-    # Copy the source file
-    cp "$post" "$sourcefile"
+    # Create dated directory structure
+    post_dir="public/$year/$month/$day"
+    mkdir -p "$post_dir"
+    htmlfile="$post_dir/$(basename "$post" .ms).html"
+    sourcehtml="$post_dir/$(basename "$post" .ms)_source.html"
+    sourcefile="$post_dir/$(basename "$post" .ms).ms"
 
-    # Generate source page
+    # Copy and generate source page
+    cp "$post" "$sourcefile"
     cat "$post" | sed 's/</\</g; s/>/\>/g' > temp_source
     echo "<pre class=\"source-code\">" > temp_source_content
     cat temp_source >> temp_source_content
@@ -251,34 +273,82 @@ while [ "$i" -lt "$total_posts" ]; do
         -e "s|{{SOURCE_LINK}}||g" \
         templates/post.html.tmpl > "$sourcehtml"
 
-    # Prev/Next links
+    # Prev/Next links with correct relative paths
     prev_link=""
     next_link=""
     if [ "$i" -gt 0 ]; then
         prev_i=$((i - 1))
-        prev_file=$(basename "${posts[$prev_i]}" .ms).html
-        prev_title=$(sed -n '/^\.TL/{n;p;}' "${posts[$prev_i]}")
+        prev_post=${posts[$prev_i]}
+        prev_date=$(sed -n '/^\.DA/{n;p;}' "$prev_post" | awk '{$NF=""; print $0}' | sed 's/ $//')
+        [ -z "$prev_date" ] && prev_date="No Date"
+        if [ "$prev_date" = "No Date" ]; then
+            prev_year="0000"; prev_month="00"; prev_day="00"
+        else
+            prev_month_name=$(echo "$prev_date" | awk '{print $1}')
+            prev_day=$(echo "$prev_date" | awk '{print $2}' | tr -d ',')
+            prev_year=$(echo "$prev_date" | awk '{print $3}')
+            case "$prev_month_name" in
+                January) prev_month="01" ;; February) prev_month="02" ;; March) prev_month="03" ;;
+                April) prev_month="04" ;; May) prev_month="05" ;; June) prev_month="06" ;;
+                July) prev_month="07" ;; August) prev_month="08" ;; September) prev_month="09" ;;
+                October) prev_month="10" ;; November) prev_month="11" ;; December) prev_month="12" ;;
+                *) prev_month="00" ;;
+            esac
+            [ "${#prev_day}" -eq 1 ] && prev_day="0$prev_day"
+        fi
+        prev_file="$(basename "$prev_post" .ms).html"
+        prev_title=$(sed -n '/^\.TL/{n;p;}' "$prev_post")
         [ -z "$prev_title" ] && prev_title="Previous Post"
-        prev_link="<a href=\"$prev_file\">← $prev_title</a>"
+        # Relative path from current post to previous post
+        prev_path="$prev_year/$prev_month/$prev_day/$prev_file"
+        # Adjust relative path based on current directory
+        if [ "$year/$month/$day" = "$prev_year/$prev_month/$prev_day" ]; then
+            prev_link="<a href=\"$prev_file\">← $prev_title</a>"
+        else
+            prev_link="<a href=\"../../../$prev_path\">← $prev_title</a>"
+        fi
     fi
     if [ "$i" -lt "$((total_posts - 1))" ]; then
         next_i=$((i + 1))
-        next_file=$(basename "${posts[$next_i]}" .ms).html
-        next_title=$(sed -n '/^\.TL/{n;p;}' "${posts[$next_i]}")
+        next_post=${posts[$next_i]}
+        next_date=$(sed -n '/^\.DA/{n;p;}' "$next_post" | awk '{$NF=""; print $0}' | sed 's/ $//')
+        [ -z "$next_date" ] && next_date="No Date"
+        if [ "$next_date" = "No Date" ]; then
+            next_year="0000"; next_month="00"; next_day="00"
+        else
+            next_month_name=$(echo "$next_date" | awk '{print $1}')
+            next_day=$(echo "$next_date" | awk '{print $2}' | tr -d ',')
+            next_year=$(echo "$next_date" | awk '{print $3}')
+            case "$next_month_name" in
+                January) next_month="01" ;; February) next_month="02" ;; March) next_month="03" ;;
+                April) next_month="04" ;; May) next_month="05" ;; June) next_month="06" ;;
+                July) next_month="07" ;; August) next_month="08" ;; September) next_month="09" ;;
+                October) next_month="10" ;; November) next_month="11" ;; December) next_month="12" ;;
+                *) next_month="00" ;;
+            esac
+            [ "${#next_day}" -eq 1 ] && next_day="0$next_day"
+        fi
+        next_file="$(basename "$next_post" .ms).html"
+        next_title=$(sed -n '/^\.TL/{n;p;}' "$next_post")
         [ -z "$next_title" ] && next_title="Next Post"
-        next_link="<a href=\"$next_file\">$next_title →</a>"
+        # Relative path from current post to next post
+        next_path="$next_year/$next_month/$next_day/$next_file"
+        if [ "$year/$month/$day" = "$next_year/$next_month/$next_day" ]; then
+            next_link="<a href=\"$next_file\">$next_title →</a>"
+        else
+            next_link="<a href=\"../../../$next_path\">$next_title →</a>"
+        fi
     fi
 
-    # Generate post content and write to temp file
+    # Generate post content
     perl preprocess-code.pl "$post" > temp_preprocessed.ms
     groff -ms -mwww -Thtml temp_preprocessed.ms > temp.html
-    # Normalize HTML output using normalize-html.pl
     perl normalize-html.pl temp.html > temp_normalized.html
     mv temp_normalized.html temp.html
     content=$(sed -n '/<body>/,/<\/body>/p' temp.html | sed '1d;$d' | sed '/<h1 align="center">/d' | sed 's|<p\(.*\)>\(.*\)</p>|<p\1 data-text="\2">\2</p>|g')
     printf '%s\n' "$content" > temp_content
 
-    # Substitute into template using temp files, reading from templates/
+    # Substitute into template with relative source link
     sed \
         -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
         -e "s|{{TITLE}}|$title|g" \
@@ -293,18 +363,17 @@ while [ "$i" -lt "$total_posts" ]; do
         -e "s|{{SOURCE_LINK}}|<a href=\"$(basename "$sourcehtml")\">View Source</a>|g" \
         templates/post.html.tmpl > "$htmlfile"
 
-    # Write to a temporary file with sortable date for sorting
     echo "$sortable_date|$htmlfile|$title|$date" >> posts.list.unsorted
     i=$((i + 1))
 done
 
-# Sort posts by date (newest first) and generate the final posts.list
+# Sort posts and generate posts.list
 sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title date; do
-    print "<li><a href=\"$(basename "$htmlfile")\">$title</a> - $date</li>" >> posts.list
+    print "<li><a href=\"$(echo "$htmlfile" | sed 's|public/||')\">$title</a> - $date</li>" >> posts.list
 done
 rm -f posts.list.unsorted
 
-# Generate index page with temp file for post list
+# Generate index page
 cat posts.list > temp_post_list
 sed \
     -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \

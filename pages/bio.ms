@@ -2,7 +2,7 @@
 .TL
 Who am I?
 .PP
-.MPIMG -R -G 10px "profile.jpg" 300px 300px
+.MPIMG -R -G 10px "/images/profile.jpg" 300px 300px
 Hi, I'm Andrath (Emiel Kollof). I'm a technology enthousiast that likes to dabble
 with all kinds of technology. I've been working in the IT industry for over 25 years
 and I've seen a lot of things come and go. I've worn and have been wearing several hats,

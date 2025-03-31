@@ -11,7 +11,7 @@ Why on earth am I actually using OpenBSD as a daily driver for serious?
 .SH
 Reasons for using OpenBSD as a daily driver.
 .PP
-.IMGLNK "puffy.png" "https://openbsd.org" "OpenBSD puffy" -R 256px 166px
+.IMGLNK "/images/puffy.png" "https://openbsd.org" "OpenBSD puffy" -R 256px 166px
 You might think me mad for running OpenBSD as a serious operating system on my
 workstation and not as a server. You can't play games on it, there is no DRM
 (so no Netflix, Amazon Prime, Crunchyroll, Spotify, etc), it's incredibly bare
