@@ -2,6 +2,7 @@
 
 A minimalist blog built with groff on OpenBSD, designed for simplicity and lightweight performance. This blog uses groff to generate HTML content from `.ms` files, styled with a clean, retro-inspired CSS theme. It features a fixed sidebar with links and a responsive layout.
 
+
 ## Features
 
 - **Lightweight:** Built with groff and minimal CSS/JS, ensuring fast load times.
