@@ -58,9 +58,9 @@ for page in "${pages[@]}"; do
 
     # Generate source HTML for static page
     cat "$page" | sed 's/</\</g; s/>/\>/g' > temp_source
-    echo "<pre class=\"source-code\">" > temp_source_content
+    echo "<pre class=\"source-code\"><code class=\"language-troff\">" > temp_source_content
     cat temp_source >> temp_source_content
-    echo "</pre>" >> temp_source_content
+    echo "</code></pre>" >> temp_source_content
     sed \
         -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
         -e "s|{{TITLE}}|$title (Source)|g" \
@@ -134,9 +134,9 @@ for page in "${pages[@]}"; do
 
     # Generate source HTML for static page (re-run for consistency)
     cat "$page" | sed 's/</\</g; s/>/\>/g' > temp_source
-    echo "<pre class=\"source-code\">" > temp_source_content
+    echo "<pre class=\"source-code\"><code class=\"language-troff\">" > temp_source_content
     cat temp_source >> temp_source_content
-    echo "</pre>" >> temp_source_content
+    echo "</code></pre>" >> temp_source_content
     sed \
         -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
         -e "s|{{TITLE}}|$title (Source)|g" \
@@ -256,9 +256,9 @@ while [ "$i" -lt "$total_posts" ]; do
     # Copy and generate source page
     cp "$post" "$sourcefile"
     cat "$post" | sed 's/</\</g; s/>/\>/g' > temp_source
-    echo "<pre class=\"source-code\">" > temp_source_content
+    echo "<pre class=\"source-code\"><code class=\"language-troff\">" > temp_source_content
     cat temp_source >> temp_source_content
-    echo "</pre>" >> temp_source_content
+    echo "</code></pre>" >> temp_source_content
     sed \
         -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
         -e "s|{{TITLE}}|$title (Source)|g" \
