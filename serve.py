@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# Save as serve.py in ~/Code/roffblog/public/
 import http.server
 import socketserver
 
