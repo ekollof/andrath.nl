@@ -49,4 +49,3 @@ You can challenge yourself too. Can you run OpenBSD as a daily driver for a
 month straight? Yes, you are permitted to use other operating as the need arises,
 but just set your default OS to OpenBSD for a while. Use it. Break it. Fix it.
 Learn it. If you're any bit of a tinkerer, you'll fall in love with it.
-.PP
