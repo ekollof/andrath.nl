@@ -17,6 +17,3 @@ don't read it.
 .PP
 Below you will find writings (newest first) that have spawned from that grey
 mass between my ears. Read at your own peril.
-.SH
-Blog
-.HR
