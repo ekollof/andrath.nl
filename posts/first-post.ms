@@ -43,4 +43,3 @@ back at their own pace.
 .PP
 Given my track record, I might not post that often, but I'll try to keep it
 updated often enough. We'll see how it goes.
-.PP
