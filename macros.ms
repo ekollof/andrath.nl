@@ -24,3 +24,14 @@ If time is not specified, it defaults to 00:00:00
 .if \\n(.$ >1 .ds _post_time \\$2
 .if \\n(.$ =1 .ds _post_time 00:00:00
 ..
+
+.ig COMMENT
+
+CMD [item]
+
+Denote something as a unix command
+.COMMENT
+
+.de CMD
+.B "\\f[CW]\\$1\\f[]"
+..
