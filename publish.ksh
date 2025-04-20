@@ -11,35 +11,61 @@ if [ -f blog.conf ]; then
     . ./blog.conf
 else
     BLOG_NAME="My Groff Blog"
-    THEME_FONT="JetBrains Mono"
-    LIGHT_BG="#ffffff"
-    LIGHT_FG="#000000"
-    LIGHT_LINK="#1a73e8"
-    DARK_BG="#1e1e1e"
-    DARK_FG="#d4d4d4"
-    DARK_LINK="#8ab4f8"
+    THEME_FONT="VT323"
+    LIGHT_BG="#0c0c0c"
+    LIGHT_FG="#33ff33"
+    LIGHT_LINK="#3377ff"
+    DARK_BG="#0c0c0c"
+    DARK_FG="#33ff33"
+    DARK_LINK="#3377ff"
     SITE_SUBTITLE="A minimalist blog built with groff on OpenBSD"
+    TERMINAL_THEME="green"
+fi
+
+# Set terminal theme colors
+if [ "$TERMINAL_THEME" = "amber" ]; then
+    LIGHT_BG="#0c0c0c"
+    LIGHT_FG="#ffb000"
+    LIGHT_LINK="#ff9000"
+    DARK_BG="#0c0c0c"
+    DARK_FG="#ffb000"
+    DARK_LINK="#ff9000"
 fi
 
 # Generate a timestamp for cache busting
 TIMESTAMP=$(date +%s)
 
 # Collect all posts into a simple array
-set -A posts posts/*.ms
-total_posts=${#posts[*]}
+# OpenBSD pdksh array compatibility
+set -- posts/*.ms
+total_posts=$#
+posts=""
+i=1
+while [ $i -le $total_posts ]; do
+    eval posts=\"\$posts \$$i\"
+    i=$((i + 1))
+done
 
 # Collect all static pages
-set -A pages pages/*.ms
+# OpenBSD pdksh array compatibility
+set -- pages/*.ms
+total_pages=$#
+pages=""
+i=1
+while [ $i -le $total_pages ]; do
+    eval pages=\"\$pages \$$i\"
+    i=$((i + 1))
+done
 
 # Create asset directories
 mkdir -p public/css public/js public/images public/fonts
 
 # Generate sidebar HTML: static pages first, then sidebar.links, then theme toggle
 sidebar_html=""
-sidebar_html="        <div class=\"sidebar-link\"><span class=\"fa fa-file-text\"></span> <a href=\"/index.html\">Home</a></div>"
+sidebar_html="        <div class=\"sidebar-link\"><span class=\"fa fa-terminal\"></span> <a href=\"/index.html\">Home</a></div>"
 
 # Static pages section (excluding index.ms)
-for page in "${pages[@]}"; do
+for page in $pages; do
     if [ "$(basename "$page" .ms)" = "index" ]; then
         continue
     fi
@@ -107,8 +133,8 @@ if [ -f sidebar.links ]; then
         rm -f temp_sidebar
     fi
 else
-    sidebar_links="        <div class=\"sidebar-link\"><span class=\"fa fa-twitter\"></span> <a href=\"https://x.com/example_user\">X: @example_user</a></div>"
-    sidebar_links="$sidebar_links        <div class=\"sidebar-link\"><span class=\"fa fa-globe\"></span> <a href=\"https://example.com\">My Website</a></div>"
+    sidebar_links="        <div class=\"sidebar-link\"><span class=\"fa fa-terminal\"></span> <a href=\"https://x.com/example_user\">X: @example_user</a></div>"
+    sidebar_links="$sidebar_links        <div class=\"sidebar-link\"><span class=\"fa fa-code\"></span> <a href=\"https://example.com\">My Website</a></div>"
 fi
 sidebar_html="$sidebar_html$sidebar_links"
 
@@ -116,7 +142,7 @@ sidebar_html="<div class=\"sidebar-links-list\">$sidebar_html</div>"
 printf '%s\n' "$sidebar_html" > temp_sidebar_html
 
 # Re-generate static pages with updated sidebar_html
-for page in "${pages[@]}"; do
+for page in $pages; do
     if [ "$(basename "$page" .ms)" = "index" ]; then
         continue
     fi
@@ -168,16 +194,31 @@ for page in "${pages[@]}"; do
         templates/static.html.tmpl > "$htmlfile"
 done
 
-# Generate vars.css from config
+# Generate vars.css from config with terminal theme support
 {
-    print ":root {"
-    print "    --light-bg: $LIGHT_BG;"
-    print "    --light-fg: $LIGHT_FG;"
-    print "    --light-link: $LIGHT_LINK;"
-    print "    --dark-bg: $DARK_BG;"
-    print "    --dark-fg: $DARK_FG;"
-    print "    --dark-link: $DARK_LINK;"
-    print "}"
+    echo ":root {"
+    echo "    --light-bg: $LIGHT_BG;"
+    echo "    --light-fg: $LIGHT_FG;"
+    echo "    --light-link: $LIGHT_LINK;"
+    echo "    --dark-bg: $DARK_BG;"
+    echo "    --dark-fg: $DARK_FG;"
+    echo "    --dark-link: $DARK_LINK;"
+    
+    # Add terminal-specific variables
+    if [ "$TERMINAL_THEME" = "amber" ]; then
+        echo "    --terminal-color: #ffb000;"
+        echo "    --terminal-dim: #aa7700;"
+        echo "    --terminal-accent: #ffd000;"
+    else # default to green
+        echo "    --terminal-color: #33ff33;"
+        echo "    --terminal-dim: #33aa33;" 
+        echo "    --terminal-accent: #00aaaa;"
+    fi
+    
+    # Add custom CSS properties
+    echo "    --theme-font: '$THEME_FONT', 'Courier New', monospace;"
+    echo "    --terminal-theme: '$TERMINAL_THEME';"
+    echo "}"
 } > public/css/vars.css
 
 # Copy static files to categorized directories
@@ -187,7 +228,7 @@ for file in $(find static/ -type f -print); do
         css) cp "$file" public/css/ ;;
         js) cp "$file" public/js/ ;;
         jpg|png|gif|svg) cp "$file" public/images/ ;;
-        ttf|woff|woff2) cp "$file" public/fonts/ ;;
+        ttf|woff|woff2|eot) cp "$file" public/fonts/ ;;
         *) cp "$file" public/ ;;  # Fallback for uncategorized files
     esac
 done
@@ -210,8 +251,7 @@ fi
 
 # Generate posts with date-based structure
 i=0
-while [ "$i" -lt "$total_posts" ]; do
-    post=${posts[$i]}
+for post in $posts; do
     title=$(sed -n '/^\.TL/{n;p;}' "$post")
     author=$(sed -n '/^\.AU/{n;p;}' "$post")
     date_line=$(sed -n '/^\.DA/{n;p;}' "$post")
@@ -277,8 +317,18 @@ while [ "$i" -lt "$total_posts" ]; do
     prev_link=""
     next_link=""
     if [ "$i" -gt 0 ]; then
+        # Need to find the previous post in a pdksh-compatible way
         prev_i=$((i - 1))
-        prev_post=${posts[$prev_i]}
+        prev_count=0
+        prev_post=""
+        for p in $posts; do
+            if [ $prev_count -eq $prev_i ]; then
+                prev_post="$p"
+                break
+            fi
+            prev_count=$((prev_count + 1))
+        done
+        
         prev_date=$(sed -n '/^\.DA/{n;p;}' "$prev_post" | awk '{$NF=""; print $0}' | sed 's/ $//')
         [ -z "$prev_date" ] && prev_date="No Date"
         if [ "$prev_date" = "No Date" ]; then
@@ -308,9 +358,20 @@ while [ "$i" -lt "$total_posts" ]; do
             prev_link="<a href=\"../../../$prev_path\">← $prev_title</a>"
         fi
     fi
-    if [ "$i" -lt "$((total_posts - 1))" ]; then
-        next_i=$((i + 1))
-        next_post=${posts[$next_i]}
+    
+    # Find next post in a pdksh-compatible way
+    next_i=$((i + 1))
+    next_count=0
+    next_post=""
+    for p in $posts; do
+        if [ $next_count -eq $next_i ]; then
+            next_post="$p"
+            break
+        fi
+        next_count=$((next_count + 1))
+    done
+    
+    if [ -n "$next_post" ]; then
         next_date=$(sed -n '/^\.DA/{n;p;}' "$next_post" | awk '{$NF=""; print $0}' | sed 's/ $//')
         [ -z "$next_date" ] && next_date="No Date"
         if [ "$next_date" = "No Date" ]; then
@@ -369,7 +430,7 @@ done
 
 # Sort posts and generate posts.list
 sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title date; do
-    print "<li><a href=\"$(echo "$htmlfile" | sed 's|public/||')\">$title</a> - $date</li>" >> posts.list
+    printf "<li><a href=\"%s\">%s</a> - %s</li>\n" "$(echo "$htmlfile" | sed 's|public/||')" "$title" "$date" >> posts.list
 done
 rm -f posts.list.unsorted
 

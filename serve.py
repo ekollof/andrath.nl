@@ -2,6 +2,10 @@
 
 import http.server
 import socketserver
+import os
+
+# Set the working directory to public/
+os.chdir('public')
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -10,6 +14,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 PORT = 8000
+print(f"Serving from 'public/' directory at http://localhost:{PORT}")
 with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
-    print(f"Serving at port {PORT}")
-    httpd.serve_forever()
+    print(f"Press Ctrl+C to stop the server")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServer stopped.")

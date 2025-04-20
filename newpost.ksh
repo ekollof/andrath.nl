@@ -10,7 +10,9 @@ fi
 title="$1"
 
 # Generate filename from title (lowercase, replace spaces with hyphens)
-filename=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//').ms
+# Using OpenBSD-compatible tr syntax without character classes
+filename=$(echo "$title" | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//')
+filename="${filename}.ms"
 filepath="posts/$filename"
 
 # Check if the file already exists
@@ -19,11 +21,10 @@ if [ -f "$filepath" ]; then
     exit 1
 fi
 
-# Get author from GECOS field or fallback to username
-gecos=$(getent passwd "$USER" | cut -d: -f5)
-if [ -n "$gecos" ] && [ "$gecos" != "," ]; then
-    # Remove trailing commas or extra fields from GECOS
-    author=$(echo "$gecos" | cut -d, -f1)
+# Get author from passwd info (OpenBSD-compatible alternative to getent)
+if [ -f /etc/passwd ]; then
+    author=$(grep "^${USER}:" /etc/passwd | cut -d: -f5 | cut -d, -f1)
+    [ -z "$author" ] && author="$USER"
 else
     author="$USER"
 fi

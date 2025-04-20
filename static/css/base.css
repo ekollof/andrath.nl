@@ -8,36 +8,76 @@
 
 @font-face {
     font-family: "Spleen";
-    src: url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.eot");
-    src: url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.eot?#iefix")format("embedded-opentype"),
-    url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.woff2")format("woff2"),
-    url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.woff")format("woff"),
-    url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.ttf")format("truetype"),
-    url("https://db.onlinewebfonts.com/t/1bd935c93d307c65f7dfbbe7803282af.svg#Spleen")format("svg");
+    src: url("/fonts/spleen-12x24.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: block; /* Ensures the font is displayed as soon as it's loaded */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* Terminal Effects - More subtle animations */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes textShadowPulse {
+    0% { text-shadow: 0 0 1px #32ff00; }
+    50% { text-shadow: 0 0 2px #32ff00; }
+    100% { text-shadow: 0 0 1px #32ff00; }
+}
+
+@keyframes scanline {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
 }
 
 /* Color Variables */
 :root {
+    /* Terminal green theme */
+    --light-bg: #0c0c0c;
+    --light-fg: #33ff33;
+    --light-link: #3377ff;
+    --light-dim: #33aa33;
+    --light-accent: #00aaaa;
+    
+    /* Amber theme as alternative */
+    --amber-bg: #0c0c0c;
+    --amber-fg: #ffb000;
+    --amber-link: #ff9000;
+    --amber-dim: #aa7700;
+    --amber-accent: #ffd000;
+    
+    /* Current theme (green by default) */
     --bg: var(--light-bg);
     --fg: var(--light-fg);
     --link: var(--light-link);
-    --sidebar-bg: #f4f4f4;
-    --border: #eee;
+    --dim: var(--light-dim);
+    --accent: var(--light-accent);
+    --sidebar-bg: #111;
+    --border: #333;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: var(--dark-bg);
-        --fg: var(--dark-fg);
-        --link: var(--dark-link);
-        --sidebar-bg: #2d2d2d;
-        --border: #444;
+        --bg: var(--light-bg);
+        --fg: var(--light-fg);
+        --link: var(--light-link);
+        --dim: var(--light-dim);
+        --accent: var(--light-accent);
+        --sidebar-bg: #111;
+        --border: #333;
     }
 }
 
 /* Global Layout */
 body {
-    font-family: "Spleen", monospace;
+    font-family: "Spleen", "VT323", "Courier New", monospace;
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -45,6 +85,45 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    font-size: 18px;
+    position: relative;
+}
+
+/* CRT Effect overlay - Much more subtle */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.05) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.1; /* Reduced from 0.2 */
+    animation: scanline 20s linear infinite; /* Slowed down from 10s to 20s */
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at center,
+        rgba(0, 0, 0, 0) 0,
+        rgba(0, 0, 0, 0.1) 100% /* Reduced from 0.2 */
+    );
+    pointer-events: none;
+    z-index: 998;
 }
 
 .main {
@@ -55,6 +134,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 120px);
+    z-index: 1;
 }
 
 /* Sidebar */
@@ -67,19 +147,24 @@ body {
     overflow-y: auto;
     background: var(--sidebar-bg);
     text-align: center;
+    border-right: 1px solid var(--dim);
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.1);
 }
 
 .sidebar .profile-pic {
     width: 100px;
     height: 100px;
-    border-radius: 50%;
+    border-radius: 0;
     margin-bottom: 20px;
     border: 2px solid var(--fg);
+    filter: sepia(0.5) hue-rotate(55deg) contrast(1.1);
+    image-rendering: pixelated;
 }
 
 .sidebar h3 {
     font-size: 1.5em;
     margin-top: 0;
+    text-shadow: 0 0 3px var(--fg); /* Reduced from 5px */
 }
 
 .sidebar-links {
@@ -98,16 +183,24 @@ body {
 
 .sidebar-link a {
     display: inline;
-    color: var(--link);
+    color: var(--fg);
     text-decoration: none;
+    text-shadow: 0 0 1px var(--fg); /* Reduced from 2px */
+    transition: all 0.3s;
 }
 
 .sidebar-link a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: var(--bg);
+    background-color: var(--fg);
+    padding: 0 4px;
 }
 
 .sidebar-link select {
     width: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--dim);
 }
 
 /* FontAwesome Icons */
@@ -134,18 +227,20 @@ body {
     background: var(--bg);
     padding: 20px 0;
     z-index: 2;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--dim);
 }
 
 h1 {
     font-size: 2em;
     margin: 0 0 10px;
+    text-shadow: 0 0 3px var(--fg); /* Reduced from 5px */
 }
 
 .post-meta {
     font-style: italic;
     margin: 0 0 10px;
     opacity: 0.8;
+    color: var(--dim);
 }
 
 body.static-page .post-meta:empty {
@@ -158,6 +253,7 @@ body.static-page .post-header .post-meta:empty ~ h1 {
 
 hr:first-of-type {
     margin: 0;
+    border-color: var(--dim);
 }
 
 .post-content {
@@ -169,38 +265,36 @@ hr:first-of-type {
     margin-top: 60px;
 }
 
+/* Remove cursor effect */
+/* No more blinking cursor after paragraphs */
+
 /* Code Blocks */
 pre {
-    background: color-mix(in srgb, var(--sidebar-bg) 80%, white);
+    background: rgba(0, 20, 0, 0.5);
+    color: var(--fg);
     padding: 25px;
-    border: 2px solid color-mix(in srgb, var(--border) 70%, var(--fg));
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--dim);
+    border-radius: 0;
+    box-shadow: inset 0 0 10px rgba(0, 50, 0, 0.5);
     white-space: pre-wrap;
     overflow-x: auto;
-    margin: 0.3em 0; /* Further reduced vertical margin */
-}
-
-@media (prefers-color-scheme: light) {
-    pre {
-        background: color-mix(in srgb, var(--sidebar-bg) 90%, black 10%);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
+    margin: 0.3em 0;
 }
 
 /* Style the <code> tag for inline formatting */
 .code-snippet {
     font-size: 1em;
-    line-height: 1.4; /* Reduced for tighter internal spacing */
-    font-family: "Spleen", monospace;
-    display: inline; /* Prevent block-level styling */
+    line-height: 1.4;
+    font-family: "Spleen", "VT323", "Courier New", monospace;
+    display: inline;
+    color: var(--accent);
 }
 
 /* Source code pages */
 pre.source-code {
     font-size: 0.9em;
-    line-height: 1.4; /* Match .code-snippet for consistency */
-    font-family: "Spleen", monospace;
+    line-height: 1.4;
+    font-family: "Spleen", "VT323", "Courier New", monospace;
 }
 
 /* Ensure content inside pre.source-code is inline */
@@ -216,13 +310,13 @@ p {
 
 /* Reduce margin stacking around code blocks */
 .post-content p {
-    margin: 0.3em 0; /* Match <pre> margin to reduce stacking */
+    margin: 0.3em 0;
 }
 
 /* Ensure no extra margin when <pre> follows or precedes a <p> */
 .post-content p + pre,
 .post-content pre + p {
-    margin-top: 0.3em; /* Consistent spacing */
+    margin-top: 0.3em;
 }
 
 /* Navigation */
@@ -232,12 +326,13 @@ p {
     left: 240px;
     right: 0;
     background: var(--sidebar-bg);
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--dim);
     padding: 10px 40px;
     display: flex;
     justify-content: space-between;
     font-size: 1.1em;
     z-index: 2;
+    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.5);
 }
 
 .prev, .next, .index {
@@ -255,12 +350,28 @@ p {
 
 /* Links */
 a {
-    color: var(--link);
+    color: var(--fg);
     text-decoration: none;
+    text-shadow: 0 0 1px var(--fg); /* Reduced from 2px */
+    transition: all 0.3s;
 }
 
 a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    background-color: var(--fg);
+    color: var(--bg);
+    padding: 0 4px;
+    text-shadow: none;
+}
+
+/* Vim navigation styling */
+.vim-highlighted-link {
+    outline: 2px solid #7db042;
+    background-color: rgba(125, 176, 66, 0.15);
+    box-shadow: 0 0 5px rgba(125, 176, 66, 0.5);
+    padding: 2px;
+    border-radius: 2px;
+    transition: all 0.2s ease;
 }
 
 /* Post List */
@@ -271,6 +382,15 @@ a:hover {
 
 .post-list li {
     margin: 10px 0;
+    position: relative;
+    padding-left: 15px;
+}
+
+.post-list li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: var(--dim);
 }
 
 /* Index Page Specific */
@@ -278,12 +398,30 @@ a:hover {
     font-size: 1.2em;
     font-weight: normal;
     margin: 0 0 10px;
-    opacity: 0.8;
+    color: var(--dim);
+    text-shadow: 0 0 2px var(--dim); /* Reduced from 3px */
 }
 
 .site-description {
     margin: 0 0 20px;
     line-height: 1.6;
+}
+
+/* Terminal boot-up animation - Much more subtle */
+@keyframes bootup {
+    0% { opacity: 0; }
+    10% { opacity: 0.7; }
+    15% { opacity: 0.9; }
+    20% { opacity: 0.7; }
+    25% { opacity: 0.9; }
+    30% { opacity: 0.7; }
+    35% { opacity: 0.9; }
+    40% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+body {
+    animation: bootup 2s ease-in-out; /* Slower animation - 2s instead of 1.5s */
 }
 
 /* Responsive Layout */
@@ -303,6 +441,8 @@ a:hover {
         width: 100%;
         height: auto;
         padding: 10px;
+        border-right: none;
+        border-bottom: 1px solid var(--dim);
     }
 
     .post {
