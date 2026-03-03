@@ -3,7 +3,12 @@
  * Overrides GitHub Primer variables to match the site's CRT aesthetic.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
 main {
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 18px;
+  letter-spacing: 0.05em;
   /* Canvas / backgrounds */
   --color-canvas-default:           #0c0c0c;
   --color-canvas-overlay:           #111111;
