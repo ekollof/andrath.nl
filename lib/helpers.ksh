@@ -57,7 +57,7 @@ parse_date_line() {
 process_ms() {
     _pm_src="$1"; _pm_out="$2"
     perl preprocess-code.pl "$_pm_src" > temp_preprocessed.ms
-    groff -ms -mwww -Thtml temp_preprocessed.ms > temp_groff.html
+    groff -ms -mwww -Thtml -k -K utf-8 temp_preprocessed.ms > temp_groff.html
     perl normalize-html.pl temp_groff.html > temp_normalized.html
     sed -n '/<body>/,/<\/body>/p' temp_normalized.html \
     | sed -e '1d' -e '$d' \
