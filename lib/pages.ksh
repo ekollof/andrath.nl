@@ -32,7 +32,7 @@ build_pages() {
             -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
             -e "s|{{TITLE}}|$_pg_title (Source)|g" \
             -e "s|{{AUTHOR}}||g" -e "s|{{DATE}}||g" \
-            -e "s|{{PAGE_TYPE}}||g" -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
+            -e "s|{{PAGE_TYPE}}|source-page|g" -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
             -e "/{{SIDEBAR_HTML}}/r temp_sidebar_html" -e "/{{SIDEBAR_HTML}}/d" \
             -e "/CONTENT_PLACEHOLDER/r temp_source_content" -e "/CONTENT_PLACEHOLDER/d" \
             -e "s|{{PREV_LINK}}||g" -e "s|{{NEXT_LINK}}||g" -e "s|{{SOURCE_LINK}}||g" \

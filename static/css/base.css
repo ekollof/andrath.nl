@@ -164,6 +164,18 @@ body::after {
     z-index: 1;
 }
 
+/* Source pages: override max-width so code lines don't cause scrollbars */
+body.source-page .main {
+    max-width: none;
+    width: calc(100vw - 280px); /* 240px margin-left + 40px padding */
+}
+
+body.source-page pre.source-code {
+    overflow-x: auto;
+    white-space: pre;
+    width: 100%;
+}
+
 /* Sidebar */
 .sidebar {
     width: 200px;

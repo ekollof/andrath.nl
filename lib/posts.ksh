@@ -70,7 +70,7 @@ build_posts() {
             -e "s|{{TITLE}}|$title (Source)|g" \
             -e "s|{{SUMMARY}}|$summary|g" \
             -e "s|{{AUTHOR}}|$author|g" -e "s|{{DATE}}|$display_date|g" \
-            -e "s|{{PAGE_TYPE}}||g" -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
+            -e "s|{{PAGE_TYPE}}|source-page|g" -e "s|{{TIMESTAMP}}|$TIMESTAMP|g" \
             -e "s|{{POST_URL}}|$post_url|g" \
             -e "s|{{SITE_URL}}|$SITE_URL|g" \
             -e "s|{{READ_TIME}}||g" \
