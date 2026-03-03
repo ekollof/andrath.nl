@@ -5,10 +5,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-main {
-  font-family: 'VT323', 'Courier New', monospace;
+main,
+main *,
+main input,
+main textarea,
+main button,
+main .btn,
+main .gsc-comment-box-textarea,
+main .gsc-main {
+  font-family: 'VT323', 'Courier New', monospace !important;
   font-size: 18px;
   letter-spacing: 0.05em;
+}
+
+main {
   /* Canvas / backgrounds */
   --color-canvas-default:           #0c0c0c;
   --color-canvas-overlay:           #111111;
