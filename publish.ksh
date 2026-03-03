@@ -249,9 +249,50 @@ fi
 # Clear posts.list before generating
 : > posts.list
 
+# Build a date-sorted post order so prev/next navigation follows chronological order.
+# First pass: collect sortable_date|post_file for every post, then sort ascending.
+: > posts.order.unsorted
+for post in $posts; do
+    _date_line=$(sed -n '/^\.DA/{n;p;}' "$post")
+    _date=$(echo "$_date_line" | awk '{$NF=""; print $0}' | sed 's/ $//')
+    _time=$(echo "$_date_line" | awk '{print $NF}')
+    if ! echo "$_time" | grep -qE '^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$'; then
+        _date="$_date_line"
+        _time="00:00:00"
+    fi
+    [ -z "$_date" ] && _date="No Date"
+    if [ "$_date" = "No Date" ]; then
+        _sortable="0000-00-00 $_time"
+    else
+        _mn=$(echo "$_date" | awk '{print $1}')
+        _dy=$(echo "$_date" | awk '{print $2}' | tr -d ',')
+        _yr=$(echo "$_date" | awk '{print $3}')
+        case "$_mn" in
+            January) _mo="01" ;; February) _mo="02" ;; March) _mo="03" ;;
+            April) _mo="04" ;; May) _mo="05" ;; June) _mo="06" ;;
+            July) _mo="07" ;; August) _mo="08" ;; September) _mo="09" ;;
+            October) _mo="10" ;; November) _mo="11" ;; December) _mo="12" ;;
+            *) _mo="00" ;;
+        esac
+        [ "${#_dy}" -eq 1 ] && _dy="0$_dy"
+        _sortable="$_yr-$_mo-$_dy $_time"
+    fi
+    echo "$_sortable|$post" >> posts.order.unsorted
+done
+# Sort ascending (oldest first) so i=0 is the oldest post
+sort posts.order.unsorted > posts.order
+rm -f posts.order.unsorted
+
+# Build sorted_posts string from the sorted order file
+sorted_posts=""
+while IFS='|' read -r _sd _pf; do
+    sorted_posts="$sorted_posts $_pf"
+done < posts.order
+rm -f posts.order
+
 # Generate posts with date-based structure
 i=0
-for post in $posts; do
+for post in $sorted_posts; do
     title=$(sed -n '/^\.TL/{n;p;}' "$post")
     author=$(sed -n '/^\.AU/{n;p;}' "$post")
     date_line=$(sed -n '/^\.DA/{n;p;}' "$post")
@@ -321,7 +362,7 @@ for post in $posts; do
         prev_i=$((i - 1))
         prev_count=0
         prev_post=""
-        for p in $posts; do
+        for p in $sorted_posts; do
             if [ $prev_count -eq $prev_i ]; then
                 prev_post="$p"
                 break
@@ -363,7 +404,7 @@ for post in $posts; do
     next_i=$((i + 1))
     next_count=0
     next_post=""
-    for p in $posts; do
+    for p in $sorted_posts; do
         if [ $next_count -eq $next_i ]; then
             next_post="$p"
             break
@@ -446,4 +487,4 @@ sed \
     -e "/{{POST_LIST}}/r temp_post_list" -e "/{{POST_LIST}}/d" \
     templates/index.html.tmpl > public/index.html
 
-rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms
+rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms posts.order posts.order.unsorted

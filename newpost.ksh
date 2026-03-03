@@ -30,7 +30,7 @@ else
 fi
 
 # Get current date and time in the desired format
-date=$(date "+%B %d, %Y %H:%M:%S")
+date=$(LC_ALL=en_US.UTF-8 date "+%B %d, %Y %H:%M:%S")
 
 # Ensure posts/ directory exists
 mkdir -p posts
