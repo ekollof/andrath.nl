@@ -6,6 +6,8 @@ vm_manager, a script to manage openbsd VMs with vmm
 Emiel Kollof
 .DA
 April 02, 2025 08:17:11
+.TAG
+openbsd, virtualization, scripting, vmm
 .PP
 Yes, OpenBSD vmm is limited, but you can still do a lot with it. I've been using
 it for a while now, and I've written a script to manage VMs with it. It's called

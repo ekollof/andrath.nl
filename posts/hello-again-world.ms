@@ -6,6 +6,8 @@ Hello (again) World
 Emiel Kollof
 .DA
 March 03, 2026 11:01:32
+.TAG
+personal, update, music
 .PP
 Wow, I really let this place go. As per usual, I suck at updating weblogs.
 .PP

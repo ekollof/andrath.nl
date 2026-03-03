@@ -40,21 +40,29 @@ fi
 # Get current date and time in the desired format
 date=$(LC_ALL=en_US.UTF-8 date "+%B %d, %Y %H:%M:%S")
 
+# Prompt for tags
+printf "Enter tags (comma-separated, e.g. openbsd, unix): "
+read tags_input
+
 # Ensure posts/ directory exists
 mkdir -p posts
 
 # Write the post template
 {
-    echo ".so macros.ms"
-    echo ".MS"
-    echo ".TL"
-    echo "$title"
-    echo ".AU"
-    echo "$author"
-    echo ".DA"
-    echo "$date"
-    echo ".PP"
-    echo "Start writing your post here..."
+    printf '%s\n' ".so macros.ms"
+    printf '%s\n' ".MS"
+    printf '%s\n' ".TL"
+    printf '%s\n' "$title"
+    printf '%s\n' ".AU"
+    printf '%s\n' "$author"
+    printf '%s\n' ".DA"
+    printf '%s\n' "$date"
+    if [ -n "$tags_input" ]; then
+        printf '%s\n' ".TAG"
+        printf '%s\n' "$tags_input"
+    fi
+    printf '%s\n' ".PP"
+    printf '%s\n' "Start writing your post here..."
 } > "$filepath"
 
 # Determine the editor to use (prefer $EDITOR, fallback to vi)

@@ -6,6 +6,8 @@ The case for static sites
 Emiel Kollof (Andrath)
 .DA
 March 28, 2025 08:23:32
+.TAG
+web, static-sites, blogging
 .PP
 You probably don't need a database for your website.
 .SH

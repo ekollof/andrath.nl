@@ -287,6 +287,51 @@ pre[class*="language-"] {
     font-family: "Spleen", "Courier New", monospace;
 }
 
+/* Callout boxes (.NOTE / .WARNING / .TIP macros) */
+.callout {
+    border-left: 3px solid var(--fg);
+    padding: 0.6em 1em;
+    margin: 1em 0;
+    background: rgba(0, 20, 0, 0.3);
+}
+
+.callout-note   { border-color: var(--accent); }
+.callout-warning { border-color: #ffb000; }
+.callout-tip    { border-color: #33ff33; }
+
+.callout-label {
+    display: block;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3em;
+    opacity: 0.8;
+}
+
+.callout-note    .callout-label { color: var(--accent); }
+.callout-warning .callout-label { color: #ffb000; }
+.callout-tip     .callout-label { color: #33ff33; }
+
+/* details/summary */
+details {
+    border: 1px solid var(--dim);
+    padding: 0.5em 1em;
+    margin: 1em 0;
+    background: rgba(0, 20, 0, 0.3);
+}
+
+details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--accent);
+    list-style: none;
+}
+
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▶ "; }
+details[open] summary::before { content: "▼ "; }
+
 /* Source code pages */
 pre.source-code {
     font-size: 0.9em;
@@ -314,6 +359,28 @@ p {
 .post-content p + pre,
 .post-content pre + p {
     margin-top: 0.3em;
+}
+
+/* Tag links */
+.post-tags {
+    margin: 0.3em 0 0.6em;
+    font-size: 0.85em;
+    color: var(--dim);
+}
+
+.post-tags a {
+    display: inline-block;
+    border: 1px solid var(--dim);
+    padding: 0 5px;
+    margin: 0 3px 3px 0;
+    text-shadow: none;
+    color: var(--accent);
+}
+
+.post-tags a:hover {
+    background-color: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
 }
 
 /* Navigation */
