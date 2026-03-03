@@ -281,13 +281,10 @@ pre {
     margin: 0.3em 0;
 }
 
-/* Style the <code> tag for inline formatting */
-.code-snippet {
-    font-size: 1em;
-    line-height: 1.4;
-    font-family: "Spleen", "VT323", "Courier New", monospace;
-    display: inline;
-    color: var(--accent);
+/* Override Prism font stack to match site theme */
+code[class*="language-"],
+pre[class*="language-"] {
+    font-family: "Spleen", "Courier New", monospace;
 }
 
 /* Source code pages */

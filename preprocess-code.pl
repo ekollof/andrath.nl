@@ -29,26 +29,18 @@ while (my $line = <$fh>) {
         $in_code_block = 1;
         $language = $1 // "none";
         $code_block = "";
-        print ".br\n";
-        print ".ns\n"; # No-space mode to suppress extra spacing
-        print ".nf\n";
-        print ".ft 5\n";
-        print ".HTML <code class=\"code-snippet language-$language\">\n";
+        print ".HTML <pre class=\"language-$language line-numbers\"><code class=\"language-$language\">\n";
         next;
     }
     elsif ($line =~ /^\.ENDCODE$/) {
         $in_code_block = 0;
         $language = "";
-        # Escape backslashes and HTML entities
-        $code_block =~ s/\\/\\\\/g;  # \n -> \\n
-        $code_block =~ s/</\</g;    # < -> <
-        $code_block =~ s/>/\>/g;    # > -> >
-        $code_block =~ s/&/\&/g;    # & -> &
-        print "$code_block\n";
-        print ".HTML </code>\n";
-        print ".ft R\n";
-        print ".fi\n";
-        print ".rs\n"; # Restore spacing mode
+        # Escape HTML entities
+        $code_block =~ s/&/&amp;/g;   # & -> &amp;  (must be first)
+        $code_block =~ s/</&lt;/g;    # < -> &lt;
+        $code_block =~ s/>/&gt;/g;    # > -> &gt;
+        print ".HTML $code_block\n";
+        print ".HTML </code></pre>\n";
         print ".PP\n";
         next;
     }
