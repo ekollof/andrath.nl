@@ -488,6 +488,28 @@ body {
     animation: bootup 2s ease-in-out; /* Slower animation - 2s instead of 1.5s */
 }
 
+/* Comments (giscus) */
+.comments {
+    margin: 2em 0 4em;
+    border-top: 1px solid var(--dim);
+    padding-top: 1.5em;
+}
+
+.comments::before {
+    content: "// comments";
+    display: block;
+    color: var(--dim);
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    margin-bottom: 1em;
+}
+
+.giscus,
+.giscus-frame {
+    width: 100%;
+    color-scheme: dark;
+}
+
 /* Responsive Layout */
 @media (max-width: 800px) {
     body {
