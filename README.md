@@ -195,6 +195,165 @@ Templates live in `templates/` and use `{{TOKEN}}` placeholders replaced by `pub
 - **RSS items missing:** Verify `SITE_URL` is set in `blog.conf` (no trailing slash).
 - **404 on assets:** Make sure `static/images/profile.jpg` and `static/favicon.ico` exist.
 
+## Groff cheatsheet
+
+Every post starts with this boilerplate:
+
+```troff
+.so macros.ms
+.MS
+.TL
+Post Title Here
+.AU
+Your Name
+.DA
+March 15, 2025 14:30:00
+.PP
+First paragraph of your post.
+```
+
+`.so macros.ms` loads the local macros. `.MS` is required — it sets up the page for HTML output. After that, write freely.
+
+### Post header macros
+
+| Macro | Purpose |
+|---|---|
+| `.TL` | Post title (next line is the title text) |
+| `.AU` | Author name (next line is the author text) |
+| `.DA <date> [time]` | Post date — must be `Month DD, YYYY` with an optional `HH:MM:SS` time |
+
+### Paragraphs and text
+
+| Macro | Purpose |
+|---|---|
+| `.PP` | Start a new paragraph (indented first line) |
+| `.LP` | Start a new paragraph (no indent) |
+| `.B text` | **Bold** inline text |
+| `.I text` | *Italic* inline text |
+| `.BI text` | Bold-italic inline text |
+
+### Headings
+
+| Macro | Purpose |
+|---|---|
+| `.SH heading` | Unnumbered section heading |
+| `.NH heading` | Numbered section heading (level 1) |
+| `.NH 2 heading` | Numbered section heading (level 2) |
+
+`.NH` auto-numbers headings (1, 2, 3…). Use `.NH 2` for sub-sections (1.1, 1.2…). Use `.SH` when you want a heading without a number.
+
+### Lists
+
+```troff
+.ULS
+.LI
+First item
+.LI
+Second item
+.LI
+Third item
+.ULE
+```
+
+`.ULS` / `.ULE` open and close an unordered (bullet) list. Each `.LI` starts a new item. Lists can contain `.PP` and inline markup inside items.
+
+### Code and monospace display
+
+For a standalone code block (monospace, indented, not filled):
+
+```troff
+.DS
+some command --flag value
+.DE
+```
+
+For inline monospace / command references use the local `.CMD` macro:
+
+```troff
+Use .CMD ssh(1) to connect to the remote host.
+```
+
+For fenced code blocks with syntax highlighting, use the `preprocess-code.pl` fence syntax (triple backtick style — see existing posts for examples). The preprocessor converts these before groff sees the file.
+
+### Links
+
+```troff
+.URL https://example.com "Link label"
+```
+
+Produces a standard hyperlink. The label is optional — if omitted the URL is used as the label.
+
+### Images and image links
+
+Embed an image:
+
+```troff
+.PSPIC -R images/photo.png 256px 166px
+```
+
+Embed an image that is also a hyperlink (local macro):
+
+```troff
+.IMGLNK "/images/photo.png" "https://example.com" "Alt text" -R 256px 166px
+```
+
+Arguments: `image_path`, `href`, `alt/title text`, `alignment` (`-L` left, `-R` right, `-C` centre), `height`, `width`.
+
+### Escaping special characters
+
+| You want | Write |
+|---|---|
+| `&` | `\&` |
+| `'` (apostrophe/right-quote) | `\(cq` or `\'` |
+| `"` | `\(lq` / `\(rq` (open/close) |
+| `-` (en-dash) | `\(en` |
+| `—` (em-dash) | `\(em` |
+| Literal backslash | `\\` |
+
+A line starting with `'` or `.` that is not a macro must be escaped with `\&` at the start to prevent groff treating it as a request.
+
+### Full post example
+
+```troff
+.so macros.ms
+.MS
+.TL
+Why I Use groff
+.AU
+Your Name
+.DA
+April 01, 2025 09:00:00
+.PP
+Most people reach for Markdown. I reach for groff.
+.SH
+The case for .ms macros
+.PP
+The
+.I ms
+macro package has been around since the 1970s and it still works.
+.PP
+Things I use it for:
+.ULS
+.LI
+Blog posts
+.LI
+Man pages
+.LI
+Short documents
+.ULE
+.SH
+Code example
+.PP
+Connect with .CMD ssh(1) like this:
+.DS
+ssh user@host -p 2222
+.DE
+.SH
+Further reading
+.PP
+.URL https://man.openbsd.org/groff_ms.7 "groff_ms(7) man page"
+```
+
 ## License
 
 MIT — use, modify, and distribute freely.
