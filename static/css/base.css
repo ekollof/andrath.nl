@@ -23,9 +23,9 @@
 }
 
 @keyframes textShadowPulse {
-    0% { text-shadow: 0 0 1px #32ff00; }
-    50% { text-shadow: 0 0 2px #32ff00; }
-    100% { text-shadow: 0 0 1px #32ff00; }
+    0% { text-shadow: 0 0 1px var(--fg); }
+    50% { text-shadow: 0 0 2px var(--fg); }
+    100% { text-shadow: 0 0 1px var(--fg); }
 }
 
 @keyframes scanline {

@@ -11,8 +11,16 @@ title="$1"
 
 # Generate filename from title (lowercase, replace spaces with hyphens)
 # Using OpenBSD-compatible tr syntax without character classes
-filename=$(echo "$title" | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//')
-filename="${filename}.ms"
+slug=$(echo "$title" | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//')
+
+# Guard against an empty or degenerate slug (e.g. all non-ASCII title)
+if [ -z "$slug" ] || [ "$slug" = "-" ]; then
+    echo "Error: Could not generate a valid filename slug from title: $title" >&2
+    echo "Please use a title that contains at least one ASCII letter or digit." >&2
+    exit 1
+fi
+
+filename="${slug}.ms"
 filepath="posts/$filename"
 
 # Check if the file already exists

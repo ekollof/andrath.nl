@@ -20,40 +20,40 @@ open(my $fh, '<', $input_file) or die "Cannot open $input_file: $!\n";
 
 my $in_code_block = 0;
 my $language = "";
-my $code_block = "";
+my @code_lines;
 
 while (my $line = <$fh>) {
-    chomp($line); # Remove trailing newline for processing
+    chomp($line);
 
     if ($line =~ /^\.CODE(?:\s+(\S+))?$/) {
         $in_code_block = 1;
         $language = $1 // "none";
-        $code_block = "";
+        @code_lines = ();
         print ".HTML <pre class=\"language-$language line-numbers\"><code class=\"language-$language\">\n";
         next;
     }
     elsif ($line =~ /^\.ENDCODE$/) {
         $in_code_block = 0;
         $language = "";
-        # Escape HTML entities
-        $code_block =~ s/&/&amp;/g;   # & -> &amp;  (must be first)
-        $code_block =~ s/</&lt;/g;    # < -> &lt;
-        $code_block =~ s/>/&gt;/g;    # > -> &gt;
-        print ".HTML $code_block\n";
+        # Emit each line individually via .HTML to avoid groff swallowing
+        # embedded newlines in a single multi-line .HTML argument.
+        for my $code_line (@code_lines) {
+            # Escape HTML entities: & first, then < and >
+            $code_line =~ s/&/&amp;/g;
+            $code_line =~ s/</&lt;/g;
+            $code_line =~ s/>/&gt;/g;
+            print ".HTML $code_line\n";
+        }
         print ".HTML </code></pre>\n";
         print ".PP\n";
+        @code_lines = ();
         next;
     }
 
     if ($in_code_block) {
-        # Collect lines into code_block
-        if ($code_block eq "") {
-            $code_block = $line;
-        } else {
-            $code_block .= "\n$line";
-        }
+        push @code_lines, $line;
     } else {
-        print "$line\n"; # Print with literal newline
+        print "$line\n";
     }
 }
 

@@ -13,7 +13,7 @@ my @output_lines = ();
 while (my $line = <>) {
     chomp $line;
 
-    if ($line =~ /<code class="code-snippet language-[^"]*">/) {
+    if ($line =~ /<code class="language-[^"]*">/) {
         $in_code_block = 1;
         $code_block = "$line\n";
         next;
