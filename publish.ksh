@@ -451,6 +451,10 @@ for post in $sorted_posts; do
     content=$(sed -n '/<body>/,/<\/body>/p' temp.html | sed '1d;$d' | sed '/<h1 align="center">/d' | sed 's|<p\(.*\)>\(.*\)</p>|<p\1 data-text="\2">\2</p>|g')
     printf '%s\n' "$content" > temp_content
 
+    # Save content for RSS (keyed by output path, slashes replaced with underscores)
+    rss_content_file="rss_content_$(echo "$htmlfile" | sed 's|/|_|g')"
+    cp temp_content "$rss_content_file"
+
     # Substitute into template with relative source link
     sed \
         -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
@@ -491,6 +495,8 @@ sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title
     post_url="$SITE_URL/$(echo "$htmlfile" | sed 's|public/||')"
     # Escape XML special chars in title
     rss_title=$(printf '%s' "$title" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+    # Read back per-post content saved during the main loop
+    rss_content_file="rss_content_$(echo "$htmlfile" | sed 's|/|_|g')"
     cat >> rss.items <<RSSITEM
     <item>
       <title>$rss_title</title>
@@ -498,8 +504,14 @@ sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title
       <guid isPermaLink="true">$post_url</guid>
       <pubDate>$rss_date</pubDate>
       <author>$author</author>
+      <description><![CDATA[
+RSSITEM
+    cat "$rss_content_file" >> rss.items
+    cat >> rss.items <<RSSITEM
+      ]]></description>
     </item>
 RSSITEM
+    rm -f "$rss_content_file"
 done
 rm -f posts.list.unsorted
 
@@ -525,4 +537,4 @@ sed \
     -e "/{{RSS_ITEMS}}/r rss.items" -e "/{{RSS_ITEMS}}/d" \
     templates/rss.xml.tmpl > public/rss.xml
 
-rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms posts.order posts.order.unsorted rss.items
+rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms posts.order posts.order.unsorted rss.items rss_content_*
