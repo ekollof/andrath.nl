@@ -1,0 +1,94 @@
+/*
+ * giscus terminal-green theme for andrath.nl
+ * Overrides GitHub Primer variables to match the site's CRT aesthetic.
+ */
+
+main {
+  /* Canvas / backgrounds */
+  --color-canvas-default:           #0c0c0c;
+  --color-canvas-overlay:           #111111;
+  --color-canvas-inset:             #080808;
+  --color-canvas-subtle:            #111111;
+
+  /* Foreground / text */
+  --color-fg-default:               #33ff33;
+  --color-fg-muted:                 #33aa33;
+  --color-fg-subtle:                #1a7a1a;
+
+  /* Borders */
+  --color-border-default:           #33aa33;
+  --color-border-muted:             #1a5c1a;
+  --color-neutral-muted:            rgba(51, 170, 51, 0.2);
+
+  /* Accent (links, focus) */
+  --color-accent-fg:                #00aaaa;
+  --color-accent-emphasis:          #00aaaa;
+  --color-accent-muted:             rgba(0, 170, 170, 0.3);
+  --color-accent-subtle:            rgba(0, 170, 170, 0.1);
+
+  /* Buttons */
+  --color-btn-text:                 #33ff33;
+  --color-btn-bg:                   #0c0c0c;
+  --color-btn-border:               #33aa33;
+  --color-btn-shadow:               0 0 transparent;
+  --color-btn-inset-shadow:         0 0 transparent;
+  --color-btn-hover-bg:             #33ff33;
+  --color-btn-hover-border:         #33ff33;
+  --color-btn-active-bg:            #1a7a1a;
+  --color-btn-active-border:        #33ff33;
+  --color-btn-selected-bg:          #080808;
+
+  /* Primary button (Sign in / submit) */
+  --color-btn-primary-text:         #0c0c0c;
+  --color-btn-primary-bg:           #33ff33;
+  --color-btn-primary-border:       #33ff33;
+  --color-btn-primary-shadow:       0 0 4px rgba(51,255,51,0.4);
+  --color-btn-primary-inset-shadow: 0 0 transparent;
+  --color-btn-primary-hover-bg:     #00aaaa;
+  --color-btn-primary-hover-border: #00aaaa;
+  --color-btn-primary-selected-bg:  #1a7a1a;
+  --color-btn-primary-disabled-text:  rgba(51,255,51,0.4);
+  --color-btn-primary-disabled-bg:    rgba(51,255,51,0.15);
+  --color-btn-primary-disabled-border: rgba(51,255,51,0.2);
+
+  /* Action list hover */
+  --color-action-list-item-default-hover-bg: rgba(51,255,51,0.08);
+
+  /* Segmented control */
+  --color-segmented-control-bg:                    rgba(51,170,51,0.1);
+  --color-segmented-control-button-bg:             #0c0c0c;
+  --color-segmented-control-button-selected-border: #33aa33;
+
+  /* States */
+  --color-success-fg:    #33ff33;
+  --color-attention-fg:  #ffb000;
+  --color-attention-muted:  rgba(255,176,0,0.3);
+  --color-attention-subtle: rgba(255,176,0,0.1);
+  --color-danger-fg:     #ff4444;
+  --color-danger-muted:  rgba(255,68,68,0.3);
+  --color-danger-subtle: rgba(255,68,68,0.1);
+
+  /* Misc */
+  --color-primer-shadow-inset: 0 0 transparent;
+  --color-scale-gray-7:  #111111;
+  --color-scale-blue-8:  #001a1a;
+  --color-social-reaction-bg-hover:         #111111;
+  --color-social-reaction-bg-reacted-hover: #001a1a;
+
+  /* Syntax highlighting — keep it green-tinted */
+  --color-prettylights-syntax-comment:              #33aa33;
+  --color-prettylights-syntax-constant:             #00aaaa;
+  --color-prettylights-syntax-entity:               #33ff33;
+  --color-prettylights-syntax-storage-modifier-import: #33ff33;
+  --color-prettylights-syntax-entity-tag:           #00aaaa;
+  --color-prettylights-syntax-keyword:              #ffb000;
+  --color-prettylights-syntax-string:               #00aaaa;
+  --color-prettylights-syntax-variable:             #33ff33;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #ff4444;
+  --color-prettylights-syntax-string-regexp:        #33ff33;
+  --color-prettylights-syntax-markup-heading:       #00aaaa;
+}
+
+main .gsc-loading-image {
+  background-image: url("https://github.githubassets.com/images/mona-loading-dark.gif");
+}
