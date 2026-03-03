@@ -1,239 +1,200 @@
-# My Groff Blog
+# andrath.nl
 
-A minimalist blog built with groff on OpenBSD, designed for simplicity and lightweight performance. This blog uses groff to generate HTML content from `.ms` files, styled with a clean, retro-inspired CSS theme. It features a fixed sidebar with links and a responsive layout.
+A minimalist static blog generator built with groff on OpenBSD. Posts are written in groff `.ms` format, converted to HTML by a single `publish.ksh` build script, and served as a fully static site with no server-side processing.
 
 ## Features
 
-- **Lightweight:** Built with groff and minimal CSS/JS, ensuring fast load times.
-- **Static Site:** No server-side processing; all pages are pre-generated HTML.
-- **Responsive Design:** Adapts to mobile and desktop screens.
-- **Customizable:** Easily configure the blog name, subtitle, colors, and sidebar links.
-- **SEO-Friendly:** Includes meta tags for better search engine visibility.
-- **Source Code View:** Each post and static page includes a "View Source" link to view the formatted `.ms` source as HTML.
+- **Groff-powered:** Content is written in `.ms` format and converted to HTML via groff.
+- **Fully static:** No database, no CMS, no server-side processing.
+- **Chronological prev/next navigation:** Posts are sorted by date; footer breadcrumbs always follow chronological order.
+- **RSS feed:** Generates `public/rss.xml` (RSS 2.0 with Atom self-link) including full post content. Autodiscovery `<link>` tags are present on all pages.
+- **Source view:** Each post and static page includes a "View Source" link exposing the raw `.ms` source as HTML.
+- **Themed terminal aesthetic:** Green or amber terminal color scheme, configurable via `blog.conf`.
+- **Vim-style keyboard navigation:** `j`/`k` to scroll, `g`/`G` to jump top/bottom.
+- **Customizable sidebar:** Static pages are added automatically; external links come from `sidebar.links`.
+- **Cache busting:** All asset URLs include a `?timestamp` query string.
 
 ## Prerequisites
 
-To set up and run this blog, you'll need:
+- OpenBSD (or another UNIX-like system with a compatible `ksh` and `groff`).
+- **groff** — install with `doas pkg_add groff` on OpenBSD.
+- **Perl** — for `preprocess-code.pl` and `normalize-html.pl` (pre-installed on OpenBSD).
+- A web server to serve `public/` (e.g. OpenBSD `httpd`, nginx, Apache).
 
-- OpenBSD (or another UNIX-like system with groff installed).
-- **groff:** For processing `.ms` files into HTML. Install with `pkg_add groff` on OpenBSD.
-- **ksh:** The Korn shell, used for the build script. Typically pre-installed on OpenBSD.
-- A web server (e.g., `httpd` on OpenBSD) to serve the generated HTML files.
-- A text editor to write `.ms` files (e.g., `vi`, `nano`).
+## Directory Structure
 
-## Setup Instructions
+```
+.
+├── blog.conf               # Site configuration
+├── newpost.ksh             # Interactive new-post scaffolder
+├── publish.ksh             # Build script — generates the entire site
+├── macros.ms               # Shared groff macros
+├── index.ms                # Homepage description blurb (groff .ms)
+├── preprocess-code.pl      # Pre-processor for code blocks
+├── normalize-html.pl       # Post-processor to clean groff HTML output
+├── serve.py                # Local dev server
+├── sidebar.links           # Pipe-delimited external sidebar links
+├── pages/                  # Static pages (bio.ms, contact.ms, …)
+├── posts/                  # Blog posts (.ms files)
+├── static/                 # Source assets (CSS, JS, fonts, images)
+│   ├── css/
+│   ├── js/
+│   ├── fonts/
+│   └── images/
+├── templates/              # HTML/XML templates
+│   ├── index.html.tmpl
+│   ├── post.html.tmpl
+│   ├── static.html.tmpl
+│   └── rss.xml.tmpl
+└── public/                 # Generated output (serve this directory)
+    ├── YYYY/MM/DD/         # Blog posts
+    ├── rss.xml             # RSS feed
+    ├── index.html
+    ├── css/ js/ fonts/ images/
+    └── *.html              # Static pages
+```
 
-1. **Clone the Repository (if applicable):**
+## Configuration — `blog.conf`
 
-        git clone <repository-url>
-        cd my-groff-blog
+```sh
+BLOG_NAME="My Blog"
+SITE_URL="https://example.com"         # Used for RSS item URLs
+SITE_SUBTITLE="A short tagline"
+THEME_FONT="Spleen"                    # Web font name
+TERMINAL_THEME="green"                 # "green" or "amber"
 
-2. **Directory Structure:**
+# Color variables (used to generate public/css/vars.css)
+LIGHT_BG="#0c0c0c"
+LIGHT_FG="#33ff33"
+LIGHT_LINK="#3377ff"
+DARK_BG="#0c0c0c"
+DARK_FG="#33ff33"
+DARK_LINK="#3377ff"
+```
 
-   Ensure your directory looks like this:
+`SITE_URL` must not have a trailing slash. It is used to build absolute URLs in `rss.xml`.
 
-        .
-        ├── blog.conf           # Configuration file (optional)
-        ├── newpost.ksh         # Script to create new posts
-        ├── publish.ksh         # Build script to generate the site
-        ├── index.ms            # Index page description (groff .ms file)
-        ├── pages/              # Static pages (e.g., bio.ms, contact.ms)
-        │   ├── bio.ms
-        │   └── contact.ms
-        ├── posts/              # Blog posts (groff .ms files)
-        │   ├── post1.ms
-        │   └── post2.ms
-        ├── sidebar.links       # Sidebar links configuration (optional)
-        ├── static/             # Static assets (CSS, fonts, images)
-        │   ├── css/
-        │   │   └── base.css
-        │   ├── fonts/
-        │   │   ├── JetBrainsMono-Regular.woff2
-        │   │   └── fontawesome-webfont.woff2
-        │   └── images/
-        │       └── profile.jpg
-        ├── templates/          # HTML templates
-        │   ├── index.html.tmpl
-        │   ├── post.html.tmpl
-        │   └── static.html.tmpl
-        └── public/             # Generated output directory (created by build script)
-            ├── YYYY/MM/DD/     # Blog posts (e.g., 2025/03/28/post1.html)
-            ├── css/            # CSS files
-            ├── fonts/          # Font files
-            ├── images/         # Image files
-            └── bio.html        # Static pages
+## Sidebar links — `sidebar.links`
 
-3. **Install Dependencies:**
+One entry per line, pipe-delimited:
 
-   On OpenBSD, ensure groff is installed:
+```
+type|https://example.com|Label text|fa-icon-name
+```
 
-        doas pkg_add groff
+Example:
 
-4. **Configure the Blog (Optional):**
+```
+link|https://github.com/youruser|GitHub|fa-github
+link|https://youtube.com/@yourchannel|YouTube|fa-youtube
+```
 
-   - Edit `blog.conf` to customize the blog name, colors, and subtitle:
+FontAwesome 4 icon names — see [fontawesome.com/v4](https://fontawesome.com/v4/icons/).
 
-            BLOG_NAME="My Groff Blog"
-            THEME_FONT="JetBrains Mono"
-            LIGHT_BG="#ffffff"
-            LIGHT_FG="#000000"
-            LIGHT_LINK="#1a73e8"
-            DARK_BG="#1e1e1e"
-            DARK_FG="#d4d4d4"
-            DARK_LINK="#8ab4f8"
-            SITE_SUBTITLE="A minimalist blog built with groff on OpenBSD"
+## Writing Posts
 
-   - Edit `sidebar.links` to customize the sidebar links (format: `type|url|label|icon`):
+### With the scaffolder (recommended)
 
-            link|https://x.com/yourusername|X: @yourusername|fa-twitter
-            link|https://yourwebsite.com|My Website|fa-globe
-            link|https://x.com/anotheruser|X: @anotheruser|fa-twitter
+```sh
+./newpost.ksh "My Post Title"
+```
 
-5. **Add a Profile Picture:**
+This creates `posts/my-post-title.ms` with your name (from GECOS), the current date in English (`LC_ALL=en_US.UTF-8` is enforced so month names are always English regardless of your locale), and prompts to open it in `$EDITOR`.
 
-   Place a `profile.jpg` file in `static/images/`. This will be displayed in the sidebar.
+### Manually
 
-6. **Add a Favicon (Optional):**
+Create a `.ms` file in `posts/`:
 
-   Place a `favicon.ico` file in `static/`. This will be used as the browser tab icon.
+```troff
+.so macros.ms
+.MS
+.TL
+My Post Title
+.AU
+Your Name
+.DA
+March 15, 2025 14:30:00
+.PP
+Post body starts here.
+```
 
-7. **Write Content:**
+**Important:** The `.DA` date must use English month names (`January`…`December`) and the format `Month DD, YYYY HH:MM:SS`. The time component is optional but recommended for stable sort order when multiple posts share the same date.
 
-   - Add blog posts in the `posts/` directory as `.ms` files (e.g., `posts/post1.ms`):
+## Building the Site
 
-            .TL
-            A Minimalist Blog Post
-            .AU
-            Alex Smith
-            .DA
-            March 26, 2025
-            .PP
-            Welcome to my first post, written in groff on OpenBSD.
+```sh
+./publish.ksh
+```
 
-   - Edit `index.ms` for the index page description:
+What the build script does:
 
-            .TL
-            Welcome to My Groff Blog
-            .PP
-            This is a minimalist blog built with groff on OpenBSD. I share my thoughts on minimalist coding, UNIX philosophy, and the power of groff. Explore my posts, bio, and contact information below.
+1. Wipes `public/` and recreates asset directories.
+2. Generates `public/css/vars.css` from `blog.conf`.
+3. Copies `static/` assets into `public/css/`, `public/js/`, etc.
+4. Processes `pages/*.ms` through groff → `public/*.html` (two passes to bootstrap the sidebar).
+5. **Sorts all posts by date (ascending)** into `sorted_posts`, then for each post:
+   - Runs groff → HTML, applies `normalize-html.pl`.
+   - Writes `public/YYYY/MM/DD/<slug>.html`, `…_source.html`, and `….ms`.
+   - Computes chronologically correct prev/next links.
+   - Appends a sorted entry to `posts.list.unsorted` and saves per-post HTML for the RSS feed.
+6. Sorts `posts.list.unsorted` descending → `posts.list` (newest first for the index).
+7. Generates `public/index.html` from `templates/index.html.tmpl`.
+8. Generates `public/rss.xml` from `templates/rss.xml.tmpl` with full post content in each `<description>` CDATA block.
 
-   - Add static pages (e.g., Bio, Contact) in the `pages/` directory as `.ms` files.
+## RSS Feed
 
-8. **Build the Site:**
+The feed is generated at `public/rss.xml` on every build. It includes:
 
-   Run the build script to generate the HTML files:
+- All posts in reverse-chronological order.
+- Full post HTML body inside `<description><![CDATA[…]]></description>`.
+- RFC 2822 `<pubDate>` derived from the post's `.DA` date.
+- An Atom `<atom:link rel="self">` pointing to `$SITE_URL/rss.xml`.
 
-        ./publish.ksh
+All HTML pages include an autodiscovery tag:
 
-   This will create the `public/` directory with all generated HTML, CSS, and assets.
+```html
+<link rel="alternate" type="application/rss+xml" title="…" href="/rss.xml">
+```
 
-9. **Serve the Site:**
+## Serving Locally
 
-   - Use OpenBSD's `httpd` to serve the `public/` directory:
+```sh
+python3 serve.py
+```
 
-            doas cp -r public/* /var/www/htdocs/
-            doas rcctl enable httpd
-            doas rcctl start httpd
+Opens on `http://localhost:8000` by default.
 
-   - Alternatively, use any web server (e.g., Nginx, Apache) or a local development server:
+## Deploying
 
-            cd public
-            python3 -m http.server 8000
+Copy `public/` to your web root:
 
-   - Open [http://localhost:8000](http://localhost:8000) (or your server's URL) in a browser to view the blog.
+```sh
+doas cp -r public/* /var/www/htdocs/
+doas rcctl enable httpd
+doas rcctl start httpd
+```
 
-## Customization
+A webhook script is available in `webhook/` for automated deployment on git push — see [`webhook/README.md`](webhook/README.md).
 
-- **Blog Name and Subtitle:** Edit `blog.conf` to change `BLOG_NAME` and `SITE_SUBTITLE`.
-- **Colors:** Modify `blog.conf` to adjust `LIGHT_BG`, `LIGHT_FG`, `LIGHT_LINK`, `DARK_BG`, `DARK_FG`, and `DARK_LINK`.
-- **Sidebar Links:** Edit `sidebar.links` to add or remove links.
-- **Profile Picture:** Replace `static/images/profile.jpg` with your own image.
-- **Favicon:** Add a `favicon.ico` to `static/`.
+## Templates
 
-## File Structure
+Templates live in `templates/` and use `{{TOKEN}}` placeholders replaced by `publish.ksh` via `sed`. Multi-line content (sidebar, post body, post list, RSS items) is injected with `sed`'s `/pattern/r file` directive.
 
-- `blog.conf`: Configuration file for blog settings (optional).
-- `newpost.ksh`: Script to create new blog posts interactively.
-- `publish.ksh`: Script to generate the static site.
-- `index.ms`: Groff file for the index page description.
-- `pages/`: Directory for static pages (e.g., `bio.ms`, `contact.ms`).
-- `posts/`: Directory for blog posts (e.g., `post1.ms`).
-- `sidebar.links`: Configuration file for sidebar links (optional).
-- `static/`: Directory for static assets (CSS, fonts, images).
-- `templates/`: Directory for HTML templates (`index.html.tmpl`, `post.html.tmpl`, `static.html.tmpl`).
-- `public/`: Output directory for the generated site, with posts in `YYYY/MM/DD/` subdirectories.
-
-## How It Works
-
-1. **Content Creation:**
-
-   - Blog posts and static pages are written in groff `.ms` format (e.g., `posts/post1.ms`, `pages/bio.ms`).
-   - The index page description is written in `index.ms`.
-
-2. **Build Process:**
-
-   - The `publish.ksh` script:
-     - Processes `.ms` files with groff to generate HTML.
-     - Sorts posts by date (newest first) and places them in `public/YYYY/MM/DD/`.
-     - Generates the sidebar with links from `sidebar.links` and static pages.
-     - Applies HTML templates (`index.html.tmpl`, `post.html.tmpl`, `static.html.tmpl`) to create the final pages.
-     - Copies static assets (CSS, fonts, images) to categorized subdirectories in `public/`.
-
-3. **Styling:**
-
-   - `base.css`: Main stylesheet for layout and styling.
-   - `vars.css`: Defines color variables (generated from `blog.conf`).
-
-4. **Output:**
-
-   - The `public/` directory contains the static site, ready to be served by a web server.
-
-## Adding a New Post
-
-1. **Create a New Post:**
-
-   Use the `newpost.ksh` script to generate a new `.ms` file in `posts/`:
-
-        ./newpost.ksh "My New Post"
-
-   This creates `posts/my-new-post.ms` with a template (title, author from GECOS, current date). Optionally, it prompts to open it in `$EDITOR` or `vi`.
-
-2. **Run the Build Script:**
-
-        ./publish.ksh
-
-   The new post will appear in `public/YYYY/MM/DD/` (e.g., `public/2025/03/27/my-new-post.html`) and on the index page, sorted by date.
-
-## Adding a New Static Page
-
-1. **Create a New Static Page:**
-
-   Create a new `.ms` file in the `pages/` directory (e.g., `pages/about.ms`):
-
-        .TL
-        About Me
-        .PP
-        I'm Alex, a minimalist coder who loves OpenBSD and groff.
-
-2. **Run the Build Script:**
-
-        ./publish.ksh
-
-   The new page will be generated (e.g., `public/about.html`) with a "View Source" link to `public/about_source.html` and added to the sidebar.
+| Template | Output | Key tokens |
+|---|---|---|
+| `index.html.tmpl` | `public/index.html` | `{{POST_LIST}}`, `{{SITE_DESCRIPTION_GROFF}}`, `{{SIDEBAR_HTML}}` |
+| `post.html.tmpl` | `public/YYYY/MM/DD/*.html` | `{{PREV_LINK}}`, `{{NEXT_LINK}}`, `{{SOURCE_LINK}}` |
+| `static.html.tmpl` | `public/*.html` | `{{SOURCE_LINK}}` |
+| `rss.xml.tmpl` | `public/rss.xml` | `{{RSS_ITEMS}}`, `{{BUILD_DATE}}`, `{{SITE_URL}}` |
 
 ## Troubleshooting
 
-- **Missing Bullets:** The sidebar uses `<div>` and `<span>` elements instead of `<ul>` to avoid bullet rendering issues.
-- **Theme Not Applying:** Ensure `amber.css` and `green.css` are in `static/css/`, and check the JavaScript console for errors.
-- **Build Errors:** Ensure groff is installed and all required files (`index.ms`, `templates/`, `static/`) are present.
-- **404 Errors:** Verify that all static assets (e.g., `profile.jpg`, `favicon.ico`) are in the `static/` directory.
+- **Wrong post order in nav:** Ensure `.DA` dates use English month names and the format `Month DD, YYYY`. The `newpost.ksh` scaffolder enforces this automatically.
+- **Post in `public/0000/00/00/`:** The month name in `.DA` wasn't recognised. Check spelling — only full English month names are supported.
+- **Build errors:** Confirm groff and Perl are installed and `templates/`, `static/`, and `macros.ms` are present.
+- **RSS items missing:** Verify `SITE_URL` is set in `blog.conf` (no trailing slash).
+- **404 on assets:** Make sure `static/images/profile.jpg` and `static/favicon.ico` exist.
 
 ## License
 
-This project is licensed under the MIT License. Feel free to use, modify, and distribute it as you see fit.
-
-## Acknowledgments
-
-- Built with groff and OpenBSD.
-- Fonts: JetBrains Mono and FontAwesome.
-- Inspired by minimalist, UNIX-friendly design principles.
+MIT — use, modify, and distribute freely.
