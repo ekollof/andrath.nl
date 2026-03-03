@@ -20,6 +20,7 @@ else
     DARK_LINK="#3377ff"
     SITE_SUBTITLE="A minimalist blog built with groff on OpenBSD"
     TERMINAL_THEME="green"
+    SITE_URL="https://example.com"
 fi
 
 # Set terminal theme colors
@@ -465,13 +466,40 @@ for post in $sorted_posts; do
         -e "s|{{SOURCE_LINK}}|<a href=\"$(basename "$sourcehtml")\">View Source</a>|g" \
         templates/post.html.tmpl > "$htmlfile"
 
-    echo "$sortable_date|$htmlfile|$title|$date" >> posts.list.unsorted
+    echo "$sortable_date|$htmlfile|$title|$date|$author" >> posts.list.unsorted
     i=$((i + 1))
 done
 
-# Sort posts and generate posts.list
-sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title date; do
+# Sort posts and generate posts.list + rss.items
+: > rss.items
+sort -r posts.list.unsorted | while IFS='|' read -r sortable_date htmlfile title date author; do
     printf "<li><a href=\"%s\">%s</a> - %s</li>\n" "$(echo "$htmlfile" | sed 's|public/||')" "$title" "$date" >> posts.list
+
+    # Build RFC 2822 pubDate from sortable_date (YYYY-MM-DD HH:MM:SS)
+    _yr=$(echo "$sortable_date" | cut -c1-4)
+    _mo=$(echo "$sortable_date" | cut -c6-7)
+    _dy=$(echo "$sortable_date" | cut -c9-10)
+    _tm=$(echo "$sortable_date" | cut -c12-19)
+    case "$_mo" in
+        01) _mon="Jan" ;; 02) _mon="Feb" ;; 03) _mon="Mar" ;;
+        04) _mon="Apr" ;; 05) _mon="May" ;; 06) _mon="Jun" ;;
+        07) _mon="Jul" ;; 08) _mon="Aug" ;; 09) _mon="Sep" ;;
+        10) _mon="Oct" ;; 11) _mon="Nov" ;; 12) _mon="Dec" ;;
+        *) _mon="Jan" ;;
+    esac
+    rss_date="$_dy $_mon $_yr $_tm +0000"
+    post_url="$SITE_URL/$(echo "$htmlfile" | sed 's|public/||')"
+    # Escape XML special chars in title
+    rss_title=$(printf '%s' "$title" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+    cat >> rss.items <<RSSITEM
+    <item>
+      <title>$rss_title</title>
+      <link>$post_url</link>
+      <guid isPermaLink="true">$post_url</guid>
+      <pubDate>$rss_date</pubDate>
+      <author>$author</author>
+    </item>
+RSSITEM
 done
 rm -f posts.list.unsorted
 
@@ -487,4 +515,14 @@ sed \
     -e "/{{POST_LIST}}/r temp_post_list" -e "/{{POST_LIST}}/d" \
     templates/index.html.tmpl > public/index.html
 
-rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms posts.order posts.order.unsorted
+# Generate RSS feed
+BUILD_DATE=$(LC_ALL=en_US.UTF-8 date "+%a, %d %b %Y %H:%M:%S +0000")
+sed \
+    -e "s|{{BLOG_NAME}}|$BLOG_NAME|g" \
+    -e "s|{{SITE_URL}}|$SITE_URL|g" \
+    -e "s|{{SITE_SUBTITLE}}|$SITE_SUBTITLE|g" \
+    -e "s|{{BUILD_DATE}}|$BUILD_DATE|g" \
+    -e "/{{RSS_ITEMS}}/r rss.items" -e "/{{RSS_ITEMS}}/d" \
+    templates/rss.xml.tmpl > public/rss.xml
+
+rm -f temp.html temp_content temp_post_list posts.list temp_source temp_source_content temp_sidebar temp_sidebar_html temp_site_description temp_preprocessed.ms posts.order posts.order.unsorted rss.items
