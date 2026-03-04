@@ -10,13 +10,19 @@ build_pages() {
     fi
 
     for _page in $pages; do
-        [ "$(basename "$_page" .ms)" = "index" ] && continue
         _pg_base=$(basename "$_page" .ms)
         _pg_title=$(sed -n '/^\.TL/{n;p;}' "$_page")
         [ -z "$_pg_title" ] && _pg_title="Untitled Page"
         _pg_html="public/${_pg_base}.html"
         _pg_sourcehtml="public/${_pg_base}_source.html"
         _pg_sourcefile="public/${_pg_base}.ms"
+
+        # index.ms is the homepage blurb — render it into temp_site_description
+        # and skip generating a standalone page for it
+        if [ "$_pg_base" = "index" ]; then
+            process_ms "$_page" temp_site_description
+            continue
+        fi
 
         process_ms "$_page" temp_content
         cp "$_page" "$_pg_sourcefile"

@@ -89,11 +89,9 @@ build_sidebar pages
 build_pages
 
 # ---------------------------------------------------------------------------
-# 4. Index description blurb
+# 4. Fallback index blurb if pages/index.ms didn't exist
 # ---------------------------------------------------------------------------
-if [ -f index.ms ]; then
-    process_ms index.ms temp_site_description
-else
+if [ ! -f temp_site_description ]; then
     printf '<p>Welcome to my blog.</p>\n' > temp_site_description
 fi
 
