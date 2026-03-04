@@ -7,7 +7,7 @@ Emiel Kollof
 .DA
 March 04, 2026 08:40:11
 .TAG
-website, ssg, updates
+website, ssg, update
 .PP
 I guess when I said update, I meant update. This is what has changed in the SSH that's running this site:
 .SH
