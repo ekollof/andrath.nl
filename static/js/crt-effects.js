@@ -2,6 +2,7 @@
  * crt-effects.js
  *
  * Canvas overlay that adds subtle CRT interference effects:
+ *   - Phosphor ghosting: previous frame persists at decaying opacity
  *   - Occasional horizontal noise/static bands (short bursts)
  *   - Very rare full-screen flicker (brightness dip)
  *   - Slow horizontal jitter (geometry instability)
@@ -29,10 +30,17 @@
 
     var ctx = canvas.getContext('2d');
 
+    // Offscreen canvas used to accumulate phosphor ghost trails.
+    // Each frame we draw the ghost buffer back at low opacity (decay),
+    // then add the new scanline bright-spot on top. Result: pixels
+    // linger and fade like phosphor persistence on a real CRT.
+    var ghostCanvas = document.createElement('canvas');
+    var ghostCtx    = ghostCanvas.getContext('2d');
+
     var W, H;
     function resize() {
-        W = canvas.width  = window.innerWidth;
-        H = canvas.height = window.innerHeight;
+        W = canvas.width  = ghostCanvas.width  = window.innerWidth;
+        H = canvas.height = ghostCanvas.height = window.innerHeight;
     }
     resize();
     window.addEventListener('resize', resize);
@@ -117,12 +125,31 @@
     function draw() {
         ctx.clearRect(0, 0, W, H);
 
+        // --- Phosphor ghosting ---
+        // 1. Decay the ghost buffer: overdraw it with a near-opaque black rect
+        //    so previous content fades toward black each frame.
+        ghostCtx.globalCompositeOperation = 'source-over';
+        ghostCtx.fillStyle = 'rgba(0,0,0,0.18)'; // decay rate: ~18% per frame
+        ghostCtx.fillRect(0, 0, W, H);
+
         // --- Rolling faint bright scanline (phosphor sweep) ---
         rollY = (rollY + rollSpeed) % H;
         var rollGrad = ctx.createLinearGradient(0, rollY - 6, 0, rollY + 6);
         rollGrad.addColorStop(0,   'rgba(51,255,51,0)');
         rollGrad.addColorStop(0.5, 'rgba(51,255,51,0.03)');
         rollGrad.addColorStop(1,   'rgba(51,255,51,0)');
+
+        // 2. Paint the current scanline bright-spot onto the ghost buffer.
+        ghostCtx.globalCompositeOperation = 'screen';
+        ghostCtx.fillStyle = rollGrad;
+        ghostCtx.fillRect(0, rollY - 6, W, 12);
+
+        // 3. Composite the ghost buffer onto the main canvas at full opacity.
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.drawImage(ghostCanvas, 0, 0);
+
+        // Draw the current scanline on the main canvas too (so it's crisp).
         ctx.fillStyle = rollGrad;
         ctx.fillRect(0, rollY - 6, W, 12);
 
@@ -145,6 +172,10 @@
                 data[p + 3] = Math.floor(a * 255);
             }
             ctx.putImageData(imageData, 0, b.y);
+
+            // Also burn noise bands into the ghost buffer so they ghost too.
+            ghostCtx.globalCompositeOperation = 'screen';
+            ghostCtx.putImageData(imageData, 0, b.y);
 
             b.life--;
             if (b.life <= 0) bands.splice(i, 1);
