@@ -164,6 +164,9 @@ python3 serve.py
 
 Opens on `http://localhost:8000` by default.
 
+- `SO_REUSEADDR` is set so restarting the server immediately after stopping it does not fail with "Address already in use".
+- The server's working directory stays at the repo root; `public/` is passed as the `directory` argument to the handler. This means you can run `./publish.ksh` while the dev server is running — the brief moment when `public/` is deleted and recreated will not crash the server process.
+
 ## Deploying
 
 Copy `public/` to your web root:
