@@ -21,6 +21,9 @@ build_pages() {
         # and skip generating a standalone page for it
         if [ "$_pg_base" = "index" ]; then
             process_ms "$_page" temp_site_description
+            # Strip the groff-generated TOC (anchor links before the first <hr>)
+            sed '/^<a href="#/d' temp_site_description > temp_site_description.tmp
+            mv temp_site_description.tmp temp_site_description
             continue
         fi
 
