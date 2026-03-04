@@ -1,5 +1,13 @@
-.so macros.ms .MS .TL The curse of Linkedin .AU Emiel Kollof .DA March 04, 2026
-09:36:49 .TAG socialmedia, linkedin, rants, work
+.so macros.ms
+.MS
+.TL
+The curse of Linkedin
+.AU
+Emiel Kollof
+.DA
+March 04, 2026 09:36:49
+.TAG
+socialmedia, linkedin, rants, work
 .PP
 Linkedin is a trash heap. I suggest fleeing that place as soon as you are able.
 .SH
