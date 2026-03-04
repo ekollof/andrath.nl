@@ -1,14 +1,34 @@
 /**
  * vim-navigation.js
- * Vim-style keyboard navigation: n/p cycle links, Enter follows, Escape clears.
- * j/k/arrows/g/G/Page keys are handled by terminal-scroll.js.
- * h/l still scroll horizontally (useful on source pages).
+ * Vim-style keyboard navigation: h/j/k/l scroll, g/G top/bottom,
+ * n/p cycle links, Enter follows highlighted link, Escape clears.
+ *
+ * Scroll calls go through window.terminalScrollBy / window.terminalScrollTo
+ * (provided by terminal-scroll.js) so they snap to line boundaries.
+ * Falls back to plain scrollBy if terminal-scroll.js isn't loaded.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-    var scrollAmount = 60; // px per h/l press
+    var scrollAmount = 60; // px for h/l horizontal scroll
     var linkHighlightIndex = -1;
     var links = [];
+
+    function scrollBy(lines) {
+        if (window.terminalScrollBy) {
+            window.terminalScrollBy(lines);
+        } else {
+            var lh = parseFloat(window.getComputedStyle(document.body).lineHeight) || 24;
+            window.scrollBy({ top: lines * lh, behavior: 'smooth' });
+        }
+    }
+
+    function scrollTo(pos) {
+        if (window.terminalScrollTo) {
+            window.terminalScrollTo(pos);
+        } else {
+            window.scrollTo({ top: pos === 'top' ? 0 : document.documentElement.scrollHeight, behavior: 'smooth' });
+        }
+    }
 
     function gatherLinks() {
         links = Array.from(document.querySelectorAll('a'));
@@ -34,7 +54,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         switch (e.key) {
-            // Horizontal scroll (terminal-scroll.js doesn't touch these)
+            case 'j': scrollBy(1);       break;
+            case 'k': scrollBy(-1);      break;
+            case 'g': scrollTo('top');   break;
+            case 'G': scrollTo('bottom');break;
+
             case 'h':
                 window.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                 break;
@@ -42,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.scrollBy({ left: scrollAmount, behavior: 'smooth' });
                 break;
 
-            // Link cycling
             case 'n':
                 if (links.length === 0) { if (!gatherLinks()) return; }
                 highlightLink((linkHighlightIndex + 1) % links.length);
@@ -52,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 highlightLink((linkHighlightIndex - 1 + links.length) % links.length);
                 break;
 
-            // Follow / clear highlighted link
             case 'Enter':
                 if (linkHighlightIndex >= 0 && linkHighlightIndex < links.length) {
                     links[linkHighlightIndex].click();
