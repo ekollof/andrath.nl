@@ -13,7 +13,7 @@ topics to personal projects and anything in between.
 DISCLAIMER: I might offend you. I have opinions and I'm not afraid to share them.
 I'm not responsible for any hurt feelings, especially not yours. If you don't like
 it, don't read it.
-.WARNING This page is not compliant with California laws. If you're from California, stop reading.
+.WARNING This page is not compliant with Californian and Brazilian laws.
 .SH
 Insanity ahead:
 
