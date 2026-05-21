@@ -22,7 +22,7 @@ xterm-kitty: unknown terminal type
 Which means hat TUI-applications will promptly give you the middle finger
 because they have no clue about what your terminal can do. Then begins the song
 and dance of
-.CMD terminfo(1)
+.CMD infocmp(1)
 and
 .CMD tic(1)
 to get the terminfo stuff installed into your sessions so at least things like
